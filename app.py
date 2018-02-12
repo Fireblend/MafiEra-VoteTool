@@ -1,9 +1,9 @@
 from flask import Flask
 from datetime import datetime
 import urllib.request
+from requests_futures.sessions import FuturesSession
 
 from bs4 import BeautifulSoup, SoupStrainer
-
 
 ############################################
 ####            GLOBAL VARIABLES
@@ -52,6 +52,14 @@ def getSoup(url, isMessage=False):
     else:
         result = BeautifulSoup(f, 'lxml')
     f.close()
+    return result
+
+#Returns a soup object from text
+def getSoupFromText(f, isMessage=False):
+    if isMessage:
+        result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
+    else:
+        result = BeautifulSoup(f, 'lxml')
     return result
 
 #Marks a vote as innactive
@@ -143,11 +151,18 @@ def scrapeThread(thread_id):
     current_day_no = -1
     days = []
 
-    # For each page:
+    # Load pages asynchronically, I'm a mad scientist
+    session = FuturesSession()
+    requests = []
     for p in range(1, numPages + 1):
+        page_url = thread_url + "page-" + str(p)
+        requests.append(session.get(page_url))
+
+    # For each page:
+    for p in range(0, numPages):
         #Load the page into BeautifulSoup
         page_url = thread_url + "page-" + str(p)
-        era_page = getSoup(page_url, True)
+        era_page = getSoupFromText(requests[p].result().text, True)
 
         #These are the posts
         posts = era_page.find_all("div", {"class" : "messageContent"})
@@ -240,4 +255,4 @@ def homepage(threadId):
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True, threaded= True)
+    app.run(debug=True, use_reloader=True)

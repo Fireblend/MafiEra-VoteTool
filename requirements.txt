@@ -4,3 +4,4 @@ pytz==2018.3
 Flask
 gunicorn
 lxml
+requests_futures
