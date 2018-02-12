@@ -133,6 +133,9 @@ def bbCodePrint(days, current_day):
         response+=bbCodePrintDay(current_day)
     return response
 
+def getSoupInBackground(sess, resp):
+    resp.data = getSoupFromText(resp.text, True)
+
 ############################################
 ####     MAIN SCRAPING FUNCTION
 ############################################
@@ -152,18 +155,18 @@ def scrapeThread(thread_id):
     days = []
 
     # Load pages asynchronically, I'm a mad scientist
-    session = FuturesSession()
+    session = FuturesSession(max_workers=10)
     requests = []
     for p in range(1, numPages + 1):
         page_url = thread_url + "page-" + str(p)
-        requests.append(session.get(page_url))
+        requests.append(session.get(page_url, background_callback=getSoupInBackground))
 
     # For each page:
     for p in range(0, numPages):
         #Load the page into BeautifulSoup
         page_url = thread_url + "page-" + str(p)
         print(page_url)
-        era_page = getSoupFromText(requests[p].result().text, True)
+        era_page = requests[p].result().data
 
         #These are the posts
         posts = era_page.find_all("div", {"class" : "messageContent"})
