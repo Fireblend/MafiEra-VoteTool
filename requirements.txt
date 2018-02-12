@@ -3,3 +3,4 @@ beautifulsoup4==4.6.0
 pytz==2018.3
 Flask
 gunicorn
+lxml
