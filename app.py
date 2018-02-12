@@ -95,10 +95,10 @@ def htmlPrintDay(day):
 def htmlPrint(days, current_day):
     response = ""
     for day_no in range(0, len(days)):
-        response+=("<br><br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br><br>")
+        response+=("<br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br>")
         response+=htmlPrintDay(days[day_no])
     if current_day != None:
-        response+=("<br><br><B> ==== DAY "+str(len(days)+1)+" VOTES ==== </B><br><br>")
+        response+=("<br><B> ==== DAY "+str(len(days)+1)+" VOTES ==== </B><br>")
         response+=htmlPrintDay(current_day)
     return response
 
@@ -118,10 +118,10 @@ def bbCodePrintDay(day):
 def bbCodePrint(days, current_day):
     response = ""
     for day_no in range(0, len(days)):
-        response+=("<br><br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
+        response+=("<br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
         response+=bbCodePrintDay(days[day_no])
     if current_day != None:
-        response+=("<br><br>[b] ==== DAY "+str(len(days)+1)+" VOTES ==== [/b]<br>")
+        response+=("<br>[b] ==== DAY "+str(len(days)+1)+" VOTES ==== [/b]<br>")
         response+=bbCodePrintDay(current_day)
     return response
 
@@ -233,7 +233,9 @@ def homepage(threadId):
 
     res = scrapeThread(threadId+"/")
 
-    response = htmlPrint(res[0], res[1]) + "<br>" + bbCodePrint(res[0], res[1])
+    response = "<br><b>Vote Tool 3000</b>"
+    response+= "<br><b>Game Thread</b>: <a href="+ base_thread_url+threadId+">"+base_thread_url+threadId+"</a><br><br>"
+    response+= (htmlPrint(res[0], res[1]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1]))
 
     return response
 
