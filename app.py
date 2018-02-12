@@ -134,7 +134,16 @@ def bbCodePrint(days, current_day):
     return response
 
 def getSoupInBackground(sess, resp):
-    resp.data = getSoupFromText(resp.text, True)
+    era_page = getSoupFromText(resp.text, True)
+
+    #These are the posts
+    posts = era_page.find_all("div", {"class" : "messageContent"})
+    #These are the users
+    users = era_page.find_all("div", {"class" : "messageUserBlock"})
+    #These are the links
+    links = era_page.find_all("div", {"class" : "postCount"})
+
+    resp.data = {"posts":posts, "users":users, "links":links}
 
 ############################################
 ####     MAIN SCRAPING FUNCTION
@@ -164,16 +173,15 @@ def scrapeThread(thread_id):
     # For each page:
     for p in range(0, numPages):
         #Load the page into BeautifulSoup
-        page_url = thread_url + "page-" + str(p)
-        print(page_url)
-        era_page = requests[p].result().data
+        print("Loading Page "+str(p))
+        pageData = requests[p].result().data
 
         #These are the posts
-        posts = era_page.find_all("div", {"class" : "messageContent"})
+        posts = pageData["posts"]
         #These are the users
-        users = era_page.find_all("div", {"class" : "messageUserBlock"})
+        users = pageData["users"]
         #These are the links
-        links = era_page.find_all("div", {"class" : "postCount"})
+        links = pageData["links"]
 
         #Let's skip the first 3 posts in the thread (usually rules)
         startPost = 0
