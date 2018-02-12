@@ -162,6 +162,7 @@ def scrapeThread(thread_id):
     for p in range(0, numPages):
         #Load the page into BeautifulSoup
         page_url = thread_url + "page-" + str(p)
+        print(page_url)
         era_page = getSoupFromText(requests[p].result().text, True)
 
         #These are the posts
