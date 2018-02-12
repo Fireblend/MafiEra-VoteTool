@@ -155,7 +155,7 @@ def scrapeThread(thread_id):
     days = []
 
     # Load pages asynchronically, I'm a mad scientist
-    session = FuturesSession(max_workers=10)
+    session = FuturesSession(max_workers=3)
     requests = []
     for p in range(1, numPages + 1):
         page_url = thread_url + "page-" + str(p)
