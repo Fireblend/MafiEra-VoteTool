@@ -1,9 +1,8 @@
 from flask import Flask
 from datetime import datetime
 import urllib.request
-import re
 
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, SoupStrainer
 
 
 ############################################
@@ -33,8 +32,10 @@ days = []
 ####     SOME USEFUL FUNCTIONS
 ############################################
 
+message_list_strainer = SoupStrainer(id="messageList")
+
 #Returns a soup object from a URL
-def getSoup(url):
+def getSoup(url, isMessage=False):
     print("REQUESTING: "+url)
     req = urllib.request.Request(
         url,
@@ -46,7 +47,10 @@ def getSoup(url):
     f = urllib.request.urlopen(req)
 
     # Store page in variable
-    result = BeautifulSoup(f, 'html.parser')
+    if isMessage:
+        result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
+    else:
+        result = BeautifulSoup(f, 'lxml')
     f.close()
     return result
 
@@ -98,6 +102,29 @@ def htmlPrint(days, current_day):
         response+=htmlPrintDay(current_day)
     return response
 
+#This formats the results into BBCode
+def bbCodePrintDay(day):
+    response = ""
+    for player in day:
+        voteList = day[player]
+        response+=("<br>[b][u]"+player+ "[/u][/b] ("+str(countActiveVotes(day[player]))+" votes)<br>")
+        for vote in voteList:
+            if(vote['active']):
+                response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]<br>")
+            else:
+                response+=("[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>")
+    return response
+
+def bbCodePrint(days, current_day):
+    response = ""
+    for day_no in range(0, len(days)):
+        response+=("<br><br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
+        response+=bbCodePrintDay(days[day_no])
+    if current_day != None:
+        response+=("<br><br>[b] ==== DAY "+str(len(days)+1)+" VOTES ==== [/b]<br>")
+        response+=bbCodePrintDay(current_day)
+    return response
+
 ############################################
 ####     MAIN SCRAPING FUNCTION
 ############################################
@@ -120,7 +147,7 @@ def scrapeThread(thread_id):
     for p in range(1, numPages + 1):
         #Load the page into BeautifulSoup
         page_url = thread_url + "page-" + str(p)
-        era_page = getSoup(page_url)
+        era_page = getSoup(page_url, False)
 
         #These are the posts
         posts = era_page.find_all("div", {"class" : "messageContent"})
@@ -189,7 +216,7 @@ def scrapeThread(thread_id):
     return [days, current_day]
 
 
-############################################ 
+############################################
 ####     FLASK CALLBACKS
 ############################################
 app = Flask(__name__)
@@ -205,7 +232,10 @@ def homepage(threadId):
     days = []
 
     res = scrapeThread(threadId+"/")
-    return htmlPrint(res[0], res[1])
+
+    response = htmlPrint(res[0], res[1]) + "<br>" + bbCodePrint(res[0], res[1])
+
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True, threaded= True)
