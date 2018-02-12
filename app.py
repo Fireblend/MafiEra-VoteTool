@@ -32,7 +32,7 @@ days = []
 ####     SOME USEFUL FUNCTIONS
 ############################################
 
-message_list_strainer = SoupStrainer(id="messageList")
+message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "postCount"]})
 
 #Returns a soup object from a URL
 def getSoup(url, isMessage=False):
@@ -132,7 +132,7 @@ def bbCodePrint(days, current_day):
 def scrapeThread(thread_id):
     # Store page in variable
     thread_url = base_thread_url+thread_id
-    era_page = getSoup(thread_url)
+    era_page = getSoup(thread_url, False)
 
     # Find out how many pages there are
     pages = era_page.find("span", {"class" : "pageNavHeader"})
@@ -147,7 +147,7 @@ def scrapeThread(thread_id):
     for p in range(1, numPages + 1):
         #Load the page into BeautifulSoup
         page_url = thread_url + "page-" + str(p)
-        era_page = getSoup(page_url, False)
+        era_page = getSoup(page_url, True)
 
         #These are the posts
         posts = era_page.find_all("div", {"class" : "messageContent"})
