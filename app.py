@@ -26,16 +26,30 @@ current_day = None
 current_day_no = -1
 
 # Main Day List
+
+# This list is an ordered LIST OF DAYS.
+# Each DAY is a dictionary, with PLAYER NAMES as the keys and a LIST OF VOTES as the value.
+
+# Each VOTE is a dictionary with the following properties:
+#       sender:         the player who made the vote
+#       active:         a boolean value that marks whether the vote is active or not
+#       vote_link:      a link to the vote post
+#       vote_num:       the post number of the vote
+#       unvote_link:    None if the vote is active, or a link to the post that made it inactive (either an unvote command, or a vote for another player)
+#       unvote_num:     None if the vote is active, or the post number of the post that made it inactive.
+
 days = []
 
 ############################################
 ####     SOME USEFUL FUNCTIONS
 ############################################
 
+#This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
 message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "postCount"]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False):
+    #Load URL using Request library
     print("REQUESTING: "+url)
     req = urllib.request.Request(
         url,
@@ -45,17 +59,15 @@ def getSoup(url, isMessage=False):
         }
     )
     f = urllib.request.urlopen(req)
-
-    # Store page in variable
-    if isMessage:
-        result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
-    else:
-        result = BeautifulSoup(f, 'lxml')
+    #Transform it into a Soup object
+    result = getSoupFromText(f, isMessage)
     f.close()
     return result
 
 # Returns a soup object from text
 def getSoupFromText(f, isMessage=False):
+    #If it's a thread page (isMessageFlag), we use the strainer we defined to only parse
+    #what we care about. If not, we parse the entire page.
     if isMessage:
         result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
     else:
