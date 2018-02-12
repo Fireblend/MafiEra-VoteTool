@@ -189,7 +189,7 @@ def scrapeThread(thread_id):
     return [days, current_day]
 
 
-############################################
+############################################ 
 ####     FLASK CALLBACKS
 ############################################
 app = Flask(__name__)
@@ -208,4 +208,4 @@ def homepage(threadId):
     return htmlPrint(res[0], res[1])
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True, threaded=True)
+    app.run(debug=True, use_reloader=True, threaded= True)
