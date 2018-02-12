@@ -34,7 +34,7 @@ days = []
 
 message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "postCount"]})
 
-#Returns a soup object from a URL
+# Returns a soup object from a URL
 def getSoup(url, isMessage=False):
     print("REQUESTING: "+url)
     req = urllib.request.Request(
@@ -54,7 +54,7 @@ def getSoup(url, isMessage=False):
     f.close()
     return result
 
-#Returns a soup object from text
+# Returns a soup object from text
 def getSoupFromText(f, isMessage=False):
     if isMessage:
         result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
@@ -62,7 +62,7 @@ def getSoupFromText(f, isMessage=False):
         result = BeautifulSoup(f, 'lxml')
     return result
 
-#Marks a vote as innactive
+# Marks a vote as innactive
 def removeActiveVote(user, day, link, post_num):
     for player in day:
         for vote in day[player]:
@@ -71,7 +71,7 @@ def removeActiveVote(user, day, link, post_num):
                 vote['unvote_link'] = link
                 vote['unvote_num'] = post_num
 
-#Adds a new vote
+# Adds a new vote
 def addActiveVote(user, target, day, link, post_num):
     toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None }
     if target in day:
@@ -79,7 +79,7 @@ def addActiveVote(user, target, day, link, post_num):
     else:
         day[target] = [toAppend]
 
-#Counts active votes from a vote list
+# Counts active votes from a vote list
 def countActiveVotes(votes):
     activeVotes = 0
     for vote in votes:
@@ -87,7 +87,7 @@ def countActiveVotes(votes):
             activeVotes = activeVotes+1
     return activeVotes
 
-#This formats the results into HTML
+# The following 2 functions format the results into HTML
 def htmlPrintDay(day):
     response = ""
     for player in day:
@@ -110,7 +110,7 @@ def htmlPrint(days, current_day):
         response+=htmlPrintDay(current_day)
     return response
 
-#This formats the results into BBCode
+# The following 2 functions format the results into BBCode
 def bbCodePrintDay(day):
     response = ""
     for player in day:
@@ -133,7 +133,9 @@ def bbCodePrint(days, current_day):
         response+=bbCodePrintDay(current_day)
     return response
 
+# This function runs on the background for each page that is loaded asynchronically.
 def getSoupInBackground(sess, resp):
+    # Loads the page into soup
     era_page = getSoupFromText(resp.text, True)
 
     #These are the posts
@@ -143,6 +145,7 @@ def getSoupInBackground(sess, resp):
     #These are the links
     links = era_page.find_all("div", {"class" : "postCount"})
 
+    #Readies the data for this page in the background
     resp.data = {"posts":posts, "users":users, "links":links}
 
 ############################################
@@ -166,7 +169,10 @@ def scrapeThread(thread_id):
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession()
     requests = []
+
     for p in range(1, numPages + 1):
+        # Each page request gets added to the session, as well as the getSoupInBackground
+        # function which lets us do some additional stuff on the background
         page_url = thread_url + "page-" + str(p)
         requests.append(session.get(page_url, background_callback=getSoupInBackground))
 
@@ -174,6 +180,9 @@ def scrapeThread(thread_id):
     for p in range(0, numPages):
         #Load the page into BeautifulSoup
         print("Loading Page "+str(p))
+
+        #Wait if needed for the request to complete. By the time it's done we should have
+        #access to the posts, users and links as parsed by the getSoupInBackground function
         pageData = requests[p].result().data
 
         #These are the posts
@@ -191,7 +200,7 @@ def scrapeThread(thread_id):
         #For each post in this page:
         for i in range(startPost, len(posts)):
 
-            #Get the current post, the user and the link
+            #Get the current post's content, the user, the link and the post number
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
             currentLink = era_url+links[i].find("a")['data-href'].partition("/permalink")[0];
@@ -252,6 +261,22 @@ app = Flask(__name__)
 def favicon():
     return ''
 
+
+@app.route('/')
+def home():
+
+    response = "<br><b>MafiEra Vote Tool 3000</b><br>"
+    response+= "<br><b>Usage</b>: Append the thread ID of the mafia game that needs to be scraped to the end of this page's URL.<br>"
+    response+= "Note that this tool scrapes the entire thread, and it may take a while to finish loading.<br>"
+
+    response+= "<br><b>Examples</b>:<br>"
+    response+= "<a href=https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712>https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712</a><br>"
+    response+= "<a href=https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251>https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251</a><br>"
+
+    response+= "<br>This tool brought to you by <b>Fireblend</b> :)<br>"
+
+    return response
+
 @app.route('/<threadId>')
 def homepage(threadId):
     current_day = None
@@ -260,7 +285,7 @@ def homepage(threadId):
 
     res = scrapeThread(threadId+"/")
 
-    response = "<br><b>Vote Tool 3000</b>"
+    response = "<br><b>MafiEra Vote Tool 3000</b>"
     response+= "<br><b>Game Thread</b>: <a href="+ base_thread_url+threadId+">"+base_thread_url+threadId+"</a><br><br>"
     response+= (htmlPrint(res[0], res[1]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1]))
 
