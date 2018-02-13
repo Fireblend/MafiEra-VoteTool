@@ -113,7 +113,7 @@ def countActiveVotes(votes):
 # The following 2 functions format the results into HTML
 def htmlPrintDay(day):
     response = ""
-    for player in day:
+    for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
         response+=("<br><u><b>"+player+ "</b></u> ("+str(countActiveVotes(day[player]))+" votes)<br>")
         for vote in voteList:
@@ -138,7 +138,8 @@ def htmlPrint(days, days_info):
 # The following 2 functions format the results into BBCode
 def bbCodePrintDay(day):
     response = ""
-    for player in day:
+
+    for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
         response+=("<br>[b][u]"+player+ "[/u][/b] ("+str(countActiveVotes(day[player]))+" votes)<br>")
         for vote in voteList:
