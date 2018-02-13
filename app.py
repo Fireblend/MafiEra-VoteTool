@@ -187,25 +187,33 @@ def scrapeThread(thread_id):
     nav = pages.contents[0].split(" ")
     numPages = int(nav[3])
 
+    #Let's initialize some variables with empty values
     current_day = None
     days = []
     days_info = []
     current_day_info = None
 
+    #By default, the scraper should start scanning on page 1, and have no
+    #reference to the last day end post scanned.
+    lastPage = 1
+    lastPost = None
+
+    ## TODO: READ FILE, LOAD DAYS AND DAYS_INFO. SET LASTPAGE TO LAST PAGE AND LASTPOST TO LAST POST
+
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession()
     requests = []
 
-    for p in range(1, numPages + 1):
+    for p in range(lastPage, numPages + 1):
         # Each page request gets added to the session, as well as the getSoupInBackground
         # function which lets us do some additional stuff on the background
         page_url = thread_url + "page-" + str(p)
         requests.append(session.get(page_url, background_callback=getSoupInBackground))
 
     # For each page:
-    for p in range(0, numPages):
+    for p in range(0, len(requests)):
         #Load the page into BeautifulSoup
-        print("Loading Page "+str(p))
+        print("Loading Page "+str(p+lastPage))
 
         #Wait if needed for the request to complete. By the time it's done we should have
         #access to the posts, users and links as parsed by the getSoupInBackground function
@@ -220,7 +228,7 @@ def scrapeThread(thread_id):
 
         #Let's skip the first 3 posts in the thread (usually rules)
         startPost = 0
-        if p == 1:
+        if p+lastPage == 1:
             startPost = 3
 
         #For each post in this page:
@@ -231,6 +239,18 @@ def scrapeThread(thread_id):
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
             currentLink = era_url+links[i].find("a")['data-href'].partition("/permalink")[0];
             currentPostNum = links[i].find("a").string;
+
+            # If we set a last day end post, meaning we loaded some previous game data,
+            # skip all posts until the one after it, by comparing post numbers.
+            if (lastPost != None):
+                currentPostInt = currentPostNum.replace("#", "").strip()
+                lastPostInt = lastPostInt.replace("#", "").strip()
+                #Ignore the post if its number is lower than last post
+                if(currentPostInt <= lastPostInt):
+                    continue
+                #Mark last post as none so we don't have to make this comparison for future posts
+                else:
+                    lastPost = None
 
             #Extract quotes so we don't accidentally count stuff in quotes
             hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock bbCodeQuote"})
