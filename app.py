@@ -1,4 +1,5 @@
 from flask import Flask
+import json
 from datetime import datetime
 import urllib.request
 from requests_futures.sessions import FuturesSession
@@ -198,7 +199,20 @@ def scrapeThread(thread_id):
     lastPage = 1
     lastPost = None
 
-    ## TODO: READ FILE, LOAD DAYS AND DAYS_INFO. SET LASTPAGE TO LAST PAGE AND LASTPOST TO LAST POST
+    #Check if there's a file corresponding to this game already
+    #if so, we load all game info and set variables so the scraper knows
+    #which page and post to start scraping from.
+    try:
+        file = open(thread_id.replace("/", "")+".json", "r")
+        text = file.read()
+        data = json.loads(text)
+        days = data[0]
+        days_info = data[1]
+        lastPage = days_info[len(days_info)-1]['page_end']
+        lastPost = days_info[len(days_info)-1]['day_end_n']
+        file.close()
+    except:
+        print("No file found, or error loading file")
 
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession()
@@ -244,7 +258,7 @@ def scrapeThread(thread_id):
             # skip all posts until the one after it, by comparing post numbers.
             if (lastPost != None):
                 currentPostInt = currentPostNum.replace("#", "").strip()
-                lastPostInt = lastPostInt.replace("#", "").strip()
+                lastPostInt = lastPost.replace("#", "").strip()
                 #Ignore the post if its number is lower than last post
                 if(currentPostInt <= lastPostInt):
                     continue
@@ -280,7 +294,15 @@ def scrapeThread(thread_id):
                                 days.append(current_day)
                                 days_info.append(current_day_info)
 
-                                #TODO: SAVE TO FILE HERE
+                                #Update this game's file with day info
+                                try:
+                                    file = open(thread_id.replace("/", "")+".json", "w")
+                                    text = json.dumps([days, days_info])
+                                    file.write(text)
+                                    file.close()
+                                except Exception as e:
+                                    print("No file found, or error loading file: ")
+                                    print (e)
 
                                 current_day = None
                                 current_day_info = None
