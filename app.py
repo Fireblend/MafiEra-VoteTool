@@ -40,6 +40,17 @@ current_day_no = -1
 
 days = []
 
+# Day Info List
+# Stores a LIST of DAY INFO dictionaries. each DAY INFO contains the following properties:
+#       day_start_l:    link to the day start post
+#       day_end_l:      link to the day end post
+#       day_start_n:    number of the day start post
+#       day_start_n:    number of the day end post
+#       page_start:     page number where the day start post is located
+#       page_end:       page number where the day end post is located
+
+days_info = []
+
 ############################################
 ####     SOME USEFUL FUNCTIONS
 ############################################
@@ -104,7 +115,7 @@ def htmlPrintDay(day):
     response = ""
     for player in day:
         voteList = day[player]
-        response+=("<br><u>"+player+ "</u>("+str(countActiveVotes(day[player]))+" votes)<br>")
+        response+=("<br><u><b>"+player+ "</b></u> ("+str(countActiveVotes(day[player]))+" votes)<br>")
         for vote in voteList:
             if(vote['active']):
                 response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
@@ -112,14 +123,24 @@ def htmlPrintDay(day):
                 response+=("<strike>"+vote['sender'] + " - <a href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike>  <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br>")
     return response
 
-def htmlPrint(days, current_day):
+def htmlPrint(days, current_day, days_info):
+    print(days_info)
     response = ""
     for day_no in range(0, len(days)):
+        day_info = days_info[day_no]
         response+=("<br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br>")
-        response+=htmlPrintDay(days[day_no])
+        response+=("<a href='"+ day_info['day_start_l']+"'>Day Start</a> ")
+        if(day_info['day_end_l']!= None):
+            response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
+        response+="<br>"+htmlPrintDay(days[day_no])
+
     if current_day != None:
+        day_info = days_info[len(days_info)-1]
         response+=("<br><B> ==== DAY "+str(len(days)+1)+" VOTES ==== </B><br>")
-        response+=htmlPrintDay(current_day)
+        response+=("<a href='"+ day_info['day_start_l']+"'>Day Start</a> ")
+        if(day_info['day_end_l']!= None):
+            response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
+        response+="<br>"+htmlPrintDay(current_day)
     return response
 
 # The following 2 functions format the results into BBCode
@@ -135,14 +156,22 @@ def bbCodePrintDay(day):
                 response+=("[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>")
     return response
 
-def bbCodePrint(days, current_day):
+def bbCodePrint(days, current_day, days_info):
     response = ""
     for day_no in range(0, len(days)):
+        day_info = days_info[day_no]
         response+=("<br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
-        response+=bbCodePrintDay(days[day_no])
+        response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
+        if(day_info['day_end_l']!= None):
+            response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
+        response+="<br>"+bbCodePrintDay(days[day_no])
     if current_day != None:
+        day_info = days_info[len(days_info)-1]
         response+=("<br>[b] ==== DAY "+str(len(days)+1)+" VOTES ==== [/b]<br>")
-        response+=bbCodePrintDay(current_day)
+        response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
+        if(day_info['day_end_l']!= None):
+            response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
+        response+="<br>"+bbCodePrintDay(current_day)
     return response
 
 # This function runs on the background for each page that is loaded asynchronically.
@@ -177,6 +206,7 @@ def scrapeThread(thread_id):
     current_day = None
     current_day_no = -1
     days = []
+    days_info = []
 
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession()
@@ -236,6 +266,7 @@ def scrapeThread(thread_id):
                         for line in str(action).lower().splitlines():
                             #If the day is starting, set the current day variable to a new day
                             if(command_day in line and command_begins in line):
+                                days_info.append({"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None})
                                 day_number = str(line).lower().partition(command_day)[2].partition(command_begins)[0].strip()
                                 current_day = {}
                                 current_day_no = day_number
@@ -243,6 +274,9 @@ def scrapeThread(thread_id):
                             #If the day has ended, append the current day to the days variable and then clear it
                             elif(command_day in line and command_ends in line):
                                 #print("DAY"+current_day_no+" ENDS")
+                                days_info[len(days_info)-1]['day_end_l'] = currentLink
+                                days_info[len(days_info)-1]['day_end_n'] = currentPostNum
+                                days_info[len(days_info)-1]['page_end'] = p
                                 days.append(current_day)
                                 current_day = None
                                 current_day_no = -1
@@ -261,7 +295,7 @@ def scrapeThread(thread_id):
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum)
 
-    return [days, current_day]
+    return [days, current_day, days_info]
 
 
 ############################################
@@ -299,7 +333,7 @@ def homepage(threadId):
 
     response = "<br><b>MafiEra Vote Tool 3000</b>"
     response+= "<br><b>Game Thread</b>: <a href="+ base_thread_url+threadId+">"+base_thread_url+threadId+"</a><br><br>"
-    response+= (htmlPrint(res[0], res[1]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1]))
+    response+= (htmlPrint(res[0], res[1], res[2]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1], res[2]))
 
     return response
 
