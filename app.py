@@ -123,7 +123,7 @@ def htmlPrintDay(day):
                 response+=("<strike>"+vote['sender'] + " - <a href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike>  <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br>")
     return response
 
-def htmlPrint(days, current_day, days_info):
+def htmlPrint(days, days_info):
     print(days_info)
     response = ""
     for day_no in range(0, len(days)):
@@ -133,14 +133,6 @@ def htmlPrint(days, current_day, days_info):
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
         response+="<br>"+htmlPrintDay(days[day_no])
-
-    if current_day != None:
-        day_info = days_info[len(days_info)-1]
-        response+=("<br><B> ==== DAY "+str(len(days)+1)+" VOTES ==== </B><br>")
-        response+=("<a href='"+ day_info['day_start_l']+"'>Day Start</a> ")
-        if(day_info['day_end_l']!= None):
-            response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
-        response+="<br>"+htmlPrintDay(current_day)
     return response
 
 # The following 2 functions format the results into BBCode
@@ -156,7 +148,7 @@ def bbCodePrintDay(day):
                 response+=("[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>")
     return response
 
-def bbCodePrint(days, current_day, days_info):
+def bbCodePrint(days, days_info):
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
@@ -165,13 +157,6 @@ def bbCodePrint(days, current_day, days_info):
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
         response+="<br>"+bbCodePrintDay(days[day_no])
-    if current_day != None:
-        day_info = days_info[len(days_info)-1]
-        response+=("<br>[b] ==== DAY "+str(len(days)+1)+" VOTES ==== [/b]<br>")
-        response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
-        if(day_info['day_end_l']!= None):
-            response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
-        response+="<br>"+bbCodePrintDay(current_day)
     return response
 
 # This function runs on the background for each page that is loaded asynchronically.
@@ -207,6 +192,7 @@ def scrapeThread(thread_id):
     current_day_no = -1
     days = []
     days_info = []
+    current_day_info = None
 
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession()
@@ -266,7 +252,7 @@ def scrapeThread(thread_id):
                         for line in str(action).lower().splitlines():
                             #If the day is starting, set the current day variable to a new day
                             if(command_day in line and command_begins in line):
-                                days_info.append({"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None})
+                                current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 day_number = str(line).lower().partition(command_day)[2].partition(command_begins)[0].strip()
                                 current_day = {}
                                 current_day_no = day_number
@@ -274,11 +260,16 @@ def scrapeThread(thread_id):
                             #If the day has ended, append the current day to the days variable and then clear it
                             elif(command_day in line and command_ends in line):
                                 #print("DAY"+current_day_no+" ENDS")
-                                days_info[len(days_info)-1]['day_end_l'] = currentLink
-                                days_info[len(days_info)-1]['day_end_n'] = currentPostNum
-                                days_info[len(days_info)-1]['page_end'] = p
+                                current_day_info['day_end_l'] = currentLink
+                                current_day_info['day_end_n'] = currentPostNum
+                                current_day_info['page_end'] = p
                                 days.append(current_day)
+                                days_info.append(current_day_info)
+
+                                #TODO: SAVE TO FILE HERE
+
                                 current_day = None
+                                current_day_info = None
                                 current_day_no = -1
                             #Handle unvote command
                             elif(command_unvote in line):
@@ -295,7 +286,11 @@ def scrapeThread(thread_id):
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum)
 
-    return [days, current_day, days_info]
+    if(current_day != None and len(current_day))>0:
+        days.append(current_day)
+        days_info.append(current_day_info)
+
+    return [days, days_info]
 
 
 ############################################
@@ -333,7 +328,7 @@ def homepage(threadId):
 
     response = "<br><b>MafiEra Vote Tool 3000</b>"
     response+= "<br><b>Game Thread</b>: <a href="+ base_thread_url+threadId+">"+base_thread_url+threadId+"</a><br><br>"
-    response+= (htmlPrint(res[0], res[1], res[2]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1], res[2]))
+    response+= (htmlPrint(res[0], res[1]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1]))
 
     return response
 
