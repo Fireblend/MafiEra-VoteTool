@@ -23,7 +23,6 @@ command_ends= "ends"
 
 # No active day atm
 current_day = None
-current_day_no = -1
 
 # Main Day List
 
@@ -189,7 +188,6 @@ def scrapeThread(thread_id):
     numPages = int(nav[3])
 
     current_day = None
-    current_day_no = -1
     days = []
     days_info = []
     current_day_info = None
@@ -253,13 +251,9 @@ def scrapeThread(thread_id):
                             #If the day is starting, set the current day variable to a new day
                             if(command_day in line and command_begins in line):
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
-                                day_number = str(line).lower().partition(command_day)[2].partition(command_begins)[0].strip()
                                 current_day = {}
-                                current_day_no = day_number
-                                #print("DAY"+current_day_no+" BEGINS")
                             #If the day has ended, append the current day to the days variable and then clear it
                             elif(command_day in line and command_ends in line):
-                                #print("DAY"+current_day_no+" ENDS")
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
                                 current_day_info['page_end'] = p
@@ -270,7 +264,6 @@ def scrapeThread(thread_id):
 
                                 current_day = None
                                 current_day_info = None
-                                current_day_no = -1
                             #Handle unvote command
                             elif(command_unvote in line):
                                 if current_day == None:
@@ -321,7 +314,6 @@ def home():
 @app.route('/<threadId>')
 def homepage(threadId):
     current_day = None
-    current_day_no = -1
     days = []
 
     res = scrapeThread(threadId+"/")
