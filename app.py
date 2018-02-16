@@ -421,7 +421,21 @@ def gamePageTest(threadId):
     bresponse = bbCodePrint(res["days"], res["days_info"], res["days_posts"])
     totals = totalCountPrint(res["days_posts"])
 
-    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"])
+    header="<br><b>MafiEra Vote Tool 3000</b>"
+    header+="<br><a href={\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+
+    header+="<img src=\""+res["banner_url"]+"\" />"
+    header+="<br><br>"
+
+    header+="<input type=\"submit\""
+    header+="value=\"Toggle HTML/BBCode\""
+    header+="onclick=\"toggleFormat()\"/>"
+
+    header+="<input type=\"submit\""
+    header+="value=\"Toggle All/Active Votes\""
+    header+="onclick=\"toggleNAVotes()\"/>"
+
+    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header)
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
