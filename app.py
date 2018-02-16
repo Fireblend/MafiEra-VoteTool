@@ -1,7 +1,7 @@
-from flask import Flask
 import json
-from datetime import datetime
 import urllib.request
+from datetime import datetime
+from flask import Flask, render_template
 from requests_futures.sessions import FuturesSession
 
 from bs4 import BeautifulSoup, SoupStrainer
@@ -122,12 +122,19 @@ def htmlPrintDay(day):
     response = ""
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
-        response+=("<br><u><b>"+player+ "</b></u> ("+str(countActiveVotes(day[player]))+" votes)<br>")
+        activeVotes = countActiveVotes(day[player])
+        if(activeVotes == 0):
+            response += "<div class=\"not_active\">"
+        response+=("<div class=\"pname\"><br><u><b>"+player+ "</b></u></div> ("+str(activeVotes)+" votes)<br>")
+        if(activeVotes == 0):
+            response += "</div>"
+        response += "<div class=\"votes\">"
         for vote in voteList:
             if(vote['active']):
                 response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
             else:
-                response+=("<strike>"+vote['sender'] + " - <a href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike>  <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
+        response += "</div>"
     return response
 
 def htmlPrint(days, days_info, days_posts):
@@ -135,7 +142,7 @@ def htmlPrint(days, days_info, days_posts):
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br>")
+        response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br></div>")
         response+=("<a href='"+ day_info['day_start_l']+"'>Day Start</a> ")
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
@@ -143,13 +150,12 @@ def htmlPrint(days, days_info, days_posts):
         response+="<br><b>Post Counts:</b><br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="<u>"+ player + "</u>: "+str(days_posts[day_no][player])+"  "
-        response+="<br>"
+        response+="<br><br>"
     return response
 
 # The following 2 functions format the results into BBCode
 def bbCodePrintDay(day):
     response = ""
-
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
         response+=("<br>[b][u]"+player+ "[/u][/b] ("+str(countActiveVotes(day[player]))+" votes)<br>")
@@ -162,7 +168,6 @@ def bbCodePrintDay(day):
 
 def bbCodePrint(days, days_info, days_posts):
     response = ""
-    total_posts_count = {}
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
         response+=("<br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
@@ -172,14 +177,18 @@ def bbCodePrint(days, days_info, days_posts):
         response+="<br>"+bbCodePrintDay(days[day_no])
         response+="<br>[b]Post Counts:[/b]<br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
+            response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
+    return response
+
+def totalCountPrint(days_posts):
+    total_posts_count = {}
+    for day_no in range(0, len(days_posts)):
+        for player in days_posts[day_no]:
             if player in total_posts_count:
                 total_posts_count[player] += days_posts[day_no][player]
             else:
                 total_posts_count[player] = days_posts[day_no][player]
-            response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
-        response+="<br>"
-
-    response+="<br><br><br><b>Total Accumulated Post Counts:</b><br>"
+    response="<br><br><br><b>Total Accumulated Post Counts:</b><br>"
     for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
         response+="<br><u>"+ player + "</u>: "+str(total_posts_count[player])+"  "
     response+="<br>"
@@ -380,32 +389,18 @@ def favicon():
 
 @app.route('/')
 def home():
-
-    response = "<br><b>MafiEra Vote Tool 3000</b><br>"
-    response+= "<br><b>Usage</b>: Append the thread ID of the mafia game that needs to be scraped to the end of this page's URL.<br>"
-    response+= "Note that this tool scrapes the entire thread, and it may take a while to finish loading.<br>"
-
-    response+= "<br><b>Examples</b>:<br>"
-    response+= "<a href=https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712>https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712</a><br>"
-    response+= "<a href=https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251>https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251</a><br>"
-
-    response+= "<br>This tool brought to you by <b>Fireblend</b> :)<br>"
-
-    return response
+    return render_template('index.html')
 
 
 @app.route('/<threadId>')
-def homepage(threadId):
+def gamePage(threadId):
     current_day = None
     days = []
-
     res = scrapeThread(threadId+"/")
-
-    response = "<br><b>MafiEra Vote Tool 3000</b>"
-    response+= "<br><b>Game Thread</b>: <a href="+ base_thread_url+threadId+">"+base_thread_url+threadId+"</a><br><br>"
-    response+= (htmlPrint(res[0], res[1], res[2]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1], res[2]))
-
-    return response
+    hresponse = htmlPrint(res[0], res[1], res[2])
+    bresponse = bbCodePrint(res[0], res[1], res[2])
+    totals = totalCountPrint(res[2])
+    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals)
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
