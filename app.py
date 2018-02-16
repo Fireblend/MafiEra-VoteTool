@@ -426,15 +426,15 @@ def gamePageTest(threadId):
 
     header+="<br><br>"
 
-    header+="<input type=\"submit\""
-    header+="value=\"Toggle HTML/BBCode\""
-    header+="onclick=\"toggleFormat()\""
-    header+="style=\"font-size : 15px; width: auto; height: auto;\"/>"
+    #header+="<input type=\"submit\""
+    #header+="value=\"Toggle HTML/BBCode\""
+    #header+="onclick=\"toggleFormat()\""
+    #header+="style=\"font-size : 15px; width: auto; height: auto;\"/>"
 
-    header+="<input type=\"submit\""
-    header+="value=\"Toggle All/Active Votes\""
-    header+="onclick=\"toggleNAVotes()\""
-    header+="style=\"font-size : 15px; width: auto; height: auto;\"/>"
+    #header+="<input type=\"submit\""
+    #header+="value=\"Toggle All/Active Votes\""
+    #header+="onclick=\"toggleNAVotes()\""
+    #header+="style=\"font-size : 15px; width: auto; height: auto;\"/>"
 
     return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header)
 
