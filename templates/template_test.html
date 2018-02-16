@@ -13,6 +13,11 @@ img {
   width: 16%;
   height: auto;
 }
+input {
+  font-size : 15px;
+  width: auto;
+  height: auto;
+}
 #striked {
   color: grey;
   display: inline;
@@ -50,6 +55,15 @@ img {
     <div id="html_out">
       {{html|safe}}
     </div>
+
+
+        <input type="button"
+        value="Toggle HTML/BBCode"
+        onclick="toggleFormat()"/>
+
+        <input type="button"
+        value="Toggle All/Active Votes"
+        onclick="toggleNAVotes()"/>
 
     <div id="bbcode_out" style="display:none">
       {{bbcode|safe}}
