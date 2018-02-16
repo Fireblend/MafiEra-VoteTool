@@ -415,6 +415,11 @@ def gamePageTest(threadId):
     info =  " <br><b>MafiEra Vote Tool 3000</b>"
     info +=  "   <br><a href=\""+base_thread_url+threadId+"\"><b>Game Thread</b></a><br><br>"
 
+    info += "<input type=\"submit\""
+    info += "   value=\"HOME\""
+    info += "   onclick=\"toggleFormat()\""
+    info += "   style=\"font-size : 20px; width: 100%; height: 100px;\" />"
+
     #info +=  "  <button onclick=\"toggleFormat()\">Toggle HTML/BBCode</button>"
     #info +=  "  <button onclick=\"toggleNAVotes()\">Toggle All/Active Votes</button><br>"
     return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, info=info)
