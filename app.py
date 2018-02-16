@@ -421,7 +421,7 @@ def gamePageTest(threadId):
     bresponse = bbCodePrint(res["days"], res["days_info"], res["days_posts"])
     totals = totalCountPrint(res["days_posts"])
 
-    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"])
+    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"])
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
