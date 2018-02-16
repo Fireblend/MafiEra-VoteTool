@@ -46,24 +46,25 @@ input {
 }
 </style>
 <body>
+<div id="content">
   <div id="info">
     {{header|safe}}
   </div>
 
-  <div id="content">
+          <input type="button"
+          value="Toggle HTML/BBCode"
+          onclick="toggleFormat()"/>
+
+          <input type="button"
+          value="Toggle All/Active Votes"
+          onclick="toggleNAVotes()"/>
+
 
     <div id="html_out">
       {{html|safe}}
     </div>
 
 
-        <input type="button"
-        value="Toggle HTML/BBCode"
-        onclick="toggleFormat()"/>
-
-        <input type="button"
-        value="Toggle All/Active Votes"
-        onclick="toggleNAVotes()"/>
 
     <div id="bbcode_out" style="display:none">
       {{bbcode|safe}}
