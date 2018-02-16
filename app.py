@@ -393,6 +393,7 @@ def home():
 
     return response
 
+
 @app.route('/<threadId>')
 def homepage(threadId):
     current_day = None
@@ -405,6 +406,13 @@ def homepage(threadId):
     response+= (htmlPrint(res[0], res[1], res[2]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1], res[2]))
 
     return response
+
+@app.route('/<threadId>/raw')
+def raw(threadId):
+    current_day = None
+    days = []
+    res = scrapeThread(threadId+"/")
+    return json.dumps(res)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True, threaded=True)
