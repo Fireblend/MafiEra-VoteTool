@@ -411,7 +411,7 @@ def gamePage(threadId):
     totals = totalCountPrint(res["days_posts"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href={\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
     header+="<img src=\""+res['banner_url']+"\" />"
 
     header+="<br><br>"
@@ -428,7 +428,7 @@ def gamePageTest(threadId):
     totals = totalCountPrint(res["days_posts"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href={\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
     header+="<img src=\""+res['banner_url']+"\" />"
 
     header+="<br><br>"
