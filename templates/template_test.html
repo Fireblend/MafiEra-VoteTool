@@ -29,6 +29,11 @@ input.btn {
   color: grey;
   display: inline;
 }
+#buttons {
+  font-size : 15px;
+  width: auto;
+  height: auto;
+}
 #info {
   text-align: center;
   width: auto;
@@ -58,14 +63,15 @@ input.btn {
     {{header|safe}}
   </div>
 
-          <input type="button"
+  <div id="buttons">
+          <input type="submit"
           value="Toggle HTML/BBCode"
           onclick="toggleFormat()"/>
 
-          <input type="button"
+          <input type="submit"
           value="Toggle All/Active Votes"
           onclick="toggleNAVotes()"/>
-
+</div>
 
     <div id="html_out">
       {{html|safe}}
