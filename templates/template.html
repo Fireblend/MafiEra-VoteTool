@@ -9,18 +9,22 @@ a {
 body {
   font-family: 'Ubuntu', sans-serif;
 }
-input {
-  font-size : 15px;
-  width: auto;
-  height: auto;
-}
 img {
-  width: 16%;
+  width: 20%;
+  height: auto;
+  box-shadow: 4px 4px 2px grey;
+}
+input {
+  font-size : 16px;
+  width: auto;
   height: auto;
 }
 #striked {
   color: grey;
   display: inline;
+}
+#buttons {
+  text-align: center;
 }
 #info {
   text-align: center;
@@ -29,6 +33,19 @@ img {
 }
 #content {
   margin-left: 15px;
+}
+.toggle {
+    font-size : 16px;
+    border-style: solid;
+    border-width: 2px;
+    color: #383838;
+    margin-right: 3px;
+    box-shadow: 4px 4px 2px grey;
+    background-color: #d8d8d8;
+    padding: 5px;
+    text-decoration: none;
+    border-color: #383838;
+    border-radius: 25px;
 }
 .votes {
   margin-left:8px;
@@ -46,22 +63,15 @@ img {
 }
 </style>
 <body>
-  <div id="info"><br><b>MafiEra Vote Tool 3000</b>
-    <br><a href={{thread_url}}><b>Go To Game Thread</b></a><br>
-
-    <img src="{{banner}}" /><br><br>
-
-    <input type="submit"
-    value="Toggle HTML/BBCode"
-    onclick="toggleFormat()"/>
-    
-    <input type="submit"
-    value="Toggle All/Active Votes"
-    onclick="toggleNAVotes()"/>
-
+<div id="content">
+  <div id="info">
+    {{header|safe}}
   </div>
 
-  <div id="content">
+  <div id="buttons">
+    <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
+    <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a>
+  </div>
 
     <div id="html_out">
       {{html|safe}}
