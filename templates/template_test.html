@@ -24,9 +24,6 @@ input {
 }
 #buttons {
   text-align: center;
-  font-size : 15px;
-  width: auto;
-  height: auto;
 }
 #info {
   text-align: center;
@@ -35,6 +32,12 @@ input {
 }
 #content {
   margin-left: 15px;
+}
+.toggle {
+font-size : 17px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 25px;
 }
 .votes {
   margin-left:8px;
@@ -58,14 +61,9 @@ input {
   </div>
 
   <div id="buttons">
-          <input type="submit"
-          value="Toggle HTML/BBCode"
-          onclick="toggleFormat()"/>
-
-          <input type="submit"
-          value="Toggle All/Active Votes"
-          onclick="toggleNAVotes()"/>
-</div>
+    <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
+    <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a>
+  </div>
 
     <div id="html_out">
       {{html|safe}}
