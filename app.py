@@ -394,6 +394,7 @@ def home():
 
 
 @app.route('/<threadId>')
+@app.route('/<threadId>/')
 def gamePage(threadId):
     current_day = None
     days = []
@@ -402,6 +403,16 @@ def gamePage(threadId):
     bresponse = bbCodePrint(res[0], res[1], res[2])
     totals = totalCountPrint(res[2])
     return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals)
+
+@app.route('/<threadId>/test')
+def gamePageTest(threadId):
+    current_day = None
+    days = []
+    res = scrapeThread(threadId+"/")
+    hresponse = htmlPrint(res[0], res[1], res[2])
+    bresponse = bbCodePrint(res[0], res[1], res[2])
+    totals = totalCountPrint(res[2])
+    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals)
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
