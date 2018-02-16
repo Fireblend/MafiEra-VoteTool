@@ -51,6 +51,13 @@ days = []
 
 days_info = []
 
+
+# Day Info List
+# Stores a LIST of POST COUNT dictionaries. Each POST COUNT dictionary correspond to one day.
+# Each POST COUNT dictionary uses PLAYER NAMES as keys, and a number (of posts) as its value.
+
+days_posts = []
+
 ############################################
 ####     SOME USEFUL FUNCTIONS
 ############################################
@@ -123,7 +130,7 @@ def htmlPrintDay(day):
                 response+=("<strike>"+vote['sender'] + " - <a href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike>  <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br>")
     return response
 
-def htmlPrint(days, days_info):
+def htmlPrint(days, days_info, days_posts):
     print(days_info)
     response = ""
     for day_no in range(0, len(days)):
@@ -133,6 +140,10 @@ def htmlPrint(days, days_info):
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
         response+="<br>"+htmlPrintDay(days[day_no])
+        response+="<br><b>Post Counts:</b><br>"
+        for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
+            response+="<u>"+ player + "</u>: "+str(days_posts[day_no][player])+"  "
+        response+="<br>"
     return response
 
 # The following 2 functions format the results into BBCode
@@ -149,8 +160,9 @@ def bbCodePrintDay(day):
                 response+=("[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>")
     return response
 
-def bbCodePrint(days, days_info):
+def bbCodePrint(days, days_info, days_posts):
     response = ""
+    total_posts_count = {}
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
         response+=("<br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
@@ -158,6 +170,19 @@ def bbCodePrint(days, days_info):
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
         response+="<br>"+bbCodePrintDay(days[day_no])
+        response+="<br>[b]Post Counts:[/b]<br>"
+        for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
+            if player in total_posts_count:
+                total_posts_count[player] += days_posts[day_no][player]
+            else:
+                total_posts_count[player] = days_posts[day_no][player]
+            response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
+        response+="<br>"
+
+    response+="<br><br><br><b>Total Accumulated Post Counts:</b><br>"
+    for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
+        response+="<br><u>"+ player + "</u>: "+str(total_posts_count[player])+"  "
+    response+="<br>"
     return response
 
 # This function runs on the background for each page that is loaded asynchronically.
@@ -191,9 +216,11 @@ def scrapeThread(thread_id):
 
     #Let's initialize some variables with empty values
     current_day = None
+    current_day_info = None
+    current_day_posts = None
     days = []
     days_info = []
-    current_day_info = None
+    days_posts = []
 
     #By default, the scraper should start scanning on page 1, and have no
     #reference to the last day end post scanned.
@@ -209,6 +236,7 @@ def scrapeThread(thread_id):
         data = json.loads(text)
         days = data[0]
         days_info = data[1]
+        days_posts = data[2]
         lastPage = days_info[len(days_info)-1]['page_end']
         lastPost = days_info[len(days_info)-1]['day_end_n']
         file.close()
@@ -255,6 +283,12 @@ def scrapeThread(thread_id):
             currentLink = era_url+links[i].find("a")['data-href'].partition("/permalink")[0];
             currentPostNum = links[i].find("a").string;
 
+            if current_day_posts != None:
+                if currentUser not in current_day_posts:
+                    current_day_posts[currentUser] = 1
+                else:
+                    current_day_posts[currentUser] += 1
+
             # If we set a last day end post, meaning we loaded some previous game data,
             # skip all posts until the one after it, by comparing post numbers.
             if (lastPost != None):
@@ -285,6 +319,7 @@ def scrapeThread(thread_id):
                         for line in str(action).lower().splitlines():
                             #If the day is starting, set the current day variable to a new day
                             if(command_day in line and command_begins in line):
+                                current_day_posts = {}
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
                             #If the day has ended, append the current day to the days variable and then clear it
@@ -294,11 +329,12 @@ def scrapeThread(thread_id):
                                 current_day_info['page_end'] = p
                                 days.append(current_day)
                                 days_info.append(current_day_info)
+                                days_posts.append(current_day_posts)
 
                                 #Update this game's file with day info
                                 try:
                                     file = open(thread_id.replace("/", "")+".json", "w")
-                                    text = json.dumps([days, days_info])
+                                    text = json.dumps([days, days_info, days_posts])
                                     file.write(text)
                                     file.close()
                                 except Exception as e:
@@ -307,6 +343,7 @@ def scrapeThread(thread_id):
 
                                 current_day = None
                                 current_day_info = None
+                                current_day_posts = None
                             #Handle unvote command
                             elif(command_unvote in line):
                                 if current_day == None:
@@ -325,8 +362,10 @@ def scrapeThread(thread_id):
     if(current_day != None and len(current_day))>0:
         days.append(current_day)
         days_info.append(current_day_info)
+        days_posts.append(current_day_posts)
 
-    return [days, days_info]
+    print(days_posts)
+    return [days, days_info, days_posts]
 
 
 ############################################
@@ -363,7 +402,7 @@ def homepage(threadId):
 
     response = "<br><b>MafiEra Vote Tool 3000</b>"
     response+= "<br><b>Game Thread</b>: <a href="+ base_thread_url+threadId+">"+base_thread_url+threadId+"</a><br><br>"
-    response+= (htmlPrint(res[0], res[1]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1]))
+    response+= (htmlPrint(res[0], res[1], res[2]) + "<br><br><b>BBCode:</b><br>" + bbCodePrint(res[0], res[1], res[2]))
 
     return response
 
