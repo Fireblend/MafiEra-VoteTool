@@ -415,8 +415,8 @@ def gamePageTest(threadId):
     info =  " <br><b>MafiEra Vote Tool 3000</b>"
     info +=  "   <br><a href=\""+base_thread_url+threadId+"\"><b>Game Thread</b></a><br><br>"
 
-    info +=  "  <button onclick=\"toggleFormat()\">Toggle HTML/BBCode</button>"
-    info +=  "  <button onclick=\"toggleNAVotes()\">Toggle All/Active Votes</button><br>"
+    #info +=  "  <button onclick=\"toggleFormat()\">Toggle HTML/BBCode</button>"
+    #info +=  "  <button onclick=\"toggleNAVotes()\">Toggle All/Active Votes</button><br>"
     return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, info=info)
 
 @app.route('/<threadId>/raw')
