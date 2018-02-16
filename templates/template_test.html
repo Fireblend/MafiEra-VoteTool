@@ -3,81 +3,100 @@
   <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu">
 </head>
 <style>
-      a {
-        color: #f44141;
-      }
-      body {
-              font-family: 'Ubuntu', sans-serif;
-      }
-      #striked {
-          color: grey;
-          display: inline;
-      }
-      #info {
-        text-align: center;
-        width: auto;
-        font-size: 19px;
-      }
-      #content {
-        margin-left: 15px;
-      }
-      .votes {
-        margin-left:8px;
-      }
-      .pname {
-        font-size: 18px;
-        display: inline;
-      }
-      .day_info {
-        margin-left:12px;
-      }
-      .day_title {
-        font-size: 19px;
-        display: inline;
-      }
+a {
+  color: #f44141;
+}
+body {
+  font-family: 'Ubuntu', sans-serif;
+}
+input {
+  font-size : 15px;
+  width: auto;
+  height: auto;
+}
+img {
+  width: 16%;
+  height: auto;
+}
+#striked {
+  color: grey;
+  display: inline;
+}
+#info {
+  text-align: center;
+  width: auto;
+  font-size: 19px;
+}
+#content {
+  margin-left: 15px;
+}
+.votes {
+  margin-left:8px;
+}
+.pname {
+  font-size: 18px;
+  display: inline;
+}
+.day_info {
+  margin-left:12px;
+}
+.day_title {
+  font-size: 19px;
+  display: inline;
+}
 </style>
 <body>
-<div id="info">
-{{info|safe}}
-</div>
+  <div id="info"><br><b>MafiEra Vote Tool 3000</b>
+    <br><a href={{thread_url}}><b>Go To Game Thread</b></a><br>
 
-<div id="content">
+    <img src="{{banner}}" /><br><br>
 
-<div id="html_out">
-{{html|safe}}
-</div>
+    <input type="submit"
+    value="Toggle HTML/BBCode"
+    onclick="toggleFormat()"/>
+    <input type="submit"
+    value="Toggle All/Active Votes"
+    onclick="toggleNAVotes()"/>
 
-<div id="bbcode_out" style="display:none">
-{{bbcode|safe}}
-</div>
+  </div>
 
-<div id="posts_total">
-{{totals|safe}}
-</div>
-</div>
+  <div id="content">
 
-<script>
-function toggleFormat() {
+    <div id="html_out">
+      {{html|safe}}
+    </div>
+
+    <div id="bbcode_out" style="display:none">
+      {{bbcode|safe}}
+    </div>
+
+    <div id="posts_total">
+      {{totals|safe}}
+    </div>
+  </div>
+
+  <script>
+  function toggleFormat() {
     var html = document.getElementById("html_out");
     var bbcode = document.getElementById("bbcode_out");
     if (html.style.display === "none") {
-        html.style.display = "block";
-        bbcode.style.display = "none";
+      html.style.display = "block";
+      bbcode.style.display = "none";
     } else {
-        html.style.display = "none";
-        bbcode.style.display = "block";
+      html.style.display = "none";
+      bbcode.style.display = "block";
     }
-}
+  }
 
-function toggleNAVotes() {
+  function toggleNAVotes() {
     var elements = document.getElementsByClassName("not_active");
     var newVal = "none";
     if (elements[0].style.display === "none") {
-        newVal = "block";
+      newVal = "block";
     }
     for(var i=0; i<elements.length; i++) {
-        elements[i].style.display = newVal
+      elements[i].style.display = newVal
     }
-}
-</script>
+  }
+  </script>
 </body>

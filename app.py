@@ -138,7 +138,6 @@ def htmlPrintDay(day):
     return response
 
 def htmlPrint(days, days_info, days_posts):
-    print(days_info)
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
@@ -232,6 +231,9 @@ def scrapeThread(thread_id):
     days_info = []
     days_posts = []
 
+    #Banner
+    banner_url = None
+
     #By default, the scraper should start scanning on page 1, and have no
     #reference to the last day end post scanned.
     lastPage = 1
@@ -244,9 +246,10 @@ def scrapeThread(thread_id):
         file = open(thread_id.replace("/", "")+".json", "r")
         text = file.read()
         data = json.loads(text)
-        days = data[0]
-        days_info = data[1]
-        days_posts = data[2]
+        days = data["days"]
+        days_info = data["days_info"]
+        days_posts = data["days_posts"]
+        banner_url = data["banner_url"]
         lastPage = days_info[len(days_info)-1]['page_end']
         lastPost = days_info[len(days_info)-1]['day_end_n']
         file.close()
@@ -282,6 +285,10 @@ def scrapeThread(thread_id):
         #Let's skip the first 3 posts in the thread (usually rules)
         startPost = 0
         if p+lastPage == 1:
+            #Try to grab a banner from the first post
+            banner_url = posts[0].find("img")["src"]
+            if '/' == banner_url[-1]:
+                banner_url[-1] = ' '
             startPost = 3
 
         #For each post in this page:
@@ -344,7 +351,7 @@ def scrapeThread(thread_id):
                                 #Update this game's file with day info
                                 try:
                                     file = open(thread_id.replace("/", "")+".json", "w")
-                                    text = json.dumps([days, days_info, days_posts])
+                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url})
                                     file.write(text)
                                     file.close()
                                 except Exception as e:
@@ -374,8 +381,7 @@ def scrapeThread(thread_id):
         days_info.append(current_day_info)
         days_posts.append(current_day_posts)
 
-    print(days_posts)
-    return [days, days_info, days_posts]
+    return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url}
 
 
 ############################################
@@ -396,33 +402,26 @@ def home():
 @app.route('/<threadId>')
 @app.route('/<threadId>/')
 def gamePage(threadId):
-    current_day = None
-    days = []
+
     res = scrapeThread(threadId+"/")
-    hresponse = htmlPrint(res[0], res[1], res[2])
-    bresponse = bbCodePrint(res[0], res[1], res[2])
-    totals = totalCountPrint(res[2])
-    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals)
+
+    hresponse = htmlPrint(res["days"], res["days_info"], res["days_posts"])
+
+    bresponse = bbCodePrint(res["days"], res["days_info"], res["days_posts"])
+    totals = totalCountPrint(res["days_posts"])
+
+    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"])
 
 @app.route('/<threadId>/test')
 def gamePageTest(threadId):
-    current_day = None
-    days = []
     res = scrapeThread(threadId+"/")
-    hresponse = htmlPrint(res[0], res[1], res[2])
-    bresponse = bbCodePrint(res[0], res[1], res[2])
-    totals = totalCountPrint(res[2])
-    info =  " <br><b>MafiEra Vote Tool 3000</b>"
-    info +=  "   <br><a href=\""+base_thread_url+threadId+"\"><b>Game Thread</b></a><br><br>"
 
-    info += "<input type=\"submit\""
-    info += "   value=\"HOME\""
-    info += "   onclick=\"toggleFormat()\""
-    info += "   style=\"font-size : 20px; width: 100%; height: 100px;\" />"
+    hresponse = htmlPrint(res["days"], res["days_info"], res["days_posts"])
 
-    #info +=  "  <button onclick=\"toggleFormat()\">Toggle HTML/BBCode</button>"
-    #info +=  "  <button onclick=\"toggleNAVotes()\">Toggle All/Active Votes</button><br>"
-    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, info=info)
+    bresponse = bbCodePrint(res["days"], res["days_info"], res["days_posts"])
+    totals = totalCountPrint(res["days_posts"])
+
+    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"])
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
