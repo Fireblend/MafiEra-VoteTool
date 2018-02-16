@@ -178,6 +178,7 @@ def bbCodePrint(days, days_info, days_posts):
         response+="<br>[b]Post Counts:[/b]<br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
+        response+="<br><br>"
     return response
 
 def totalCountPrint(days_posts):
