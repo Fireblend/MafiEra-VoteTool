@@ -146,11 +146,11 @@ def htmlPrint(days, days_info, days_posts):
         response+=("<a href='"+ day_info['day_start_l']+"'>Day Start</a> ")
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
-        response+="<br>"+htmlPrintDay(days[day_no])
+        response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no])
         response+="<br><b>Post Counts:</b><br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="<u>"+ player + "</u>: "+str(days_posts[day_no][player])+"  "
-        response+="<br><br>"
+        response+="<br><br></div>"
     return response
 
 # The following 2 functions format the results into BBCode
@@ -189,10 +189,10 @@ def totalCountPrint(days_posts):
                 total_posts_count[player] += days_posts[day_no][player]
             else:
                 total_posts_count[player] = days_posts[day_no][player]
-    response="<br><br><br><b>Total Accumulated Post Counts:</b><br>"
+    response="<br><br><b>Total Accumulated Post Counts:</b><br><div class=\"day_info\">"
     for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
         response+="<br><u>"+ player + "</u>: "+str(total_posts_count[player])+"  "
-    response+="<br>"
+    response+="<br></div>"
     return response
 
 # This function runs on the background for each page that is loaded asynchronically.
