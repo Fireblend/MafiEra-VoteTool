@@ -250,11 +250,15 @@ def scrapeThread(thread_id):
         days_info = data["days_info"]
         days_posts = data["days_posts"]
         banner_url = data["banner_url"]
+
+
         lastPage = days_info[len(days_info)-1]['page_end']
         lastPost = days_info[len(days_info)-1]['day_end_n']
+
         file.close()
-    except:
-        print("No file found, or error loading file")
+    except Exception as e:
+        print("No file found, or error loading file: ")
+        print (e)
 
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession()
@@ -341,9 +345,11 @@ def scrapeThread(thread_id):
                                 current_day = {}
                             #If the day has ended, append the current day to the days variable and then clear it
                             elif(command_day in line and command_ends in line):
+                                if current_day == None:
+                                    continue
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
-                                current_day_info['page_end'] = p
+                                current_day_info['page_end'] = p+lastPage
                                 days.append(current_day)
                                 days_info.append(current_day_info)
                                 days_posts.append(current_day_posts)
