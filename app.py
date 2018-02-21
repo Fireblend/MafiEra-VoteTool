@@ -68,7 +68,6 @@ message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messa
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False):
     #Load URL using Request library
-    print("REQUESTING: "+url)
     req = urllib.request.Request(
         url,
         data=None,
@@ -272,9 +271,6 @@ def scrapeThread(thread_id):
 
     # For each page:
     for p in range(0, len(requests)):
-        #Load the page into BeautifulSoup
-        print("Loading Page "+str(p+lastPage))
-
         #Wait if needed for the request to complete. By the time it's done we should have
         #access to the posts, users and links as parsed by the getSoupInBackground function
         pageData = requests[p].result().data
@@ -297,7 +293,7 @@ def scrapeThread(thread_id):
 
         #For each post in this page:
         for i in range(startPost, len(posts)):
-
+            nextPost = False
             #Get the current post's content, the user, the link and the post number
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
@@ -331,6 +327,8 @@ def scrapeThread(thread_id):
             action_list = currentPost.find_all("span")
             if len(action_list) > 0:
                 for action in action_list:
+                    if nextPost:
+                        break
                     #Check for color tags
                     if action.has_attr('style') and 'color' in action['style']:
                         #I'm removing bold tags here to simplify the command matching procedure
@@ -338,15 +336,21 @@ def scrapeThread(thread_id):
                             match.replaceWithChildren()
                         #Check for valid commands
                         for line in str(action).lower().splitlines():
+                            if nextPost:
+                                break
                             #If the day is starting, set the current day variable to a new day
                             if(command_day in line and command_begins in line):
+                                print("New day begins on post "+currentPostNum+"("+currentLink+")")
                                 current_day_posts = {}
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
+                                nextPost = True
+                                break
                             #If the day has ended, append the current day to the days variable and then clear it
                             elif(command_day in line and command_ends in line):
                                 if current_day == None:
                                     continue
+                                print("Day ends on "+currentPostNum+"("+currentLink+")")
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
                                 current_day_info['page_end'] = p+lastPage
@@ -367,18 +371,20 @@ def scrapeThread(thread_id):
                                 current_day = None
                                 current_day_info = None
                                 current_day_posts = None
+                                nextPost = True
+                                break
                             #Handle unvote command
                             elif(command_unvote in line):
                                 if current_day == None:
                                     continue
-                                #print(currentUser+" UNVOTED"+ " ("+currentLink+")")
+                                print(currentUser+" UNVOTED"+ " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                             #Handle vote command
                             elif(command_vote in line):
                                 if current_day == None:
                                     continue
                                 target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
-                                #print(currentUser+" VOTED FOR: "+ target + " ("+currentLink+")")
+                                print(currentUser+" VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum)
 
