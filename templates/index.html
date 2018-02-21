@@ -1,10 +1,63 @@
 
-<br><b>MafiEra Vote Tool 3000</b><br>
-<br><b>Usage</b>: Append the thread ID of the mafia game that needs to be scraped to the end of this page's URL.<br>
-Note that this tool scrapes the entire thread, and it may take a while to finish loading.<br>
 
-<br><b>Examples</b>:<br>
-<a href=https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712>https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712</a><br>
-<a href=https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251>https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251</a><br>
+<head>
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu">
+</head>
+<style>
+a {
+  color: #f44141;
+}
+body {
+  font-family: 'Ubuntu', sans-serif;
+}
+#info {
+  text-align: center;
+  width: auto;
+  font-size: 21px;
+}
+#content {
+  margin-left: 15px;
+}
+#content-guide {
+  margin-left: 15px;
+}
+#content-guide b {
+  color: #f44141;
+}
+.comheader {
+  display: inline;
+  font-size: 18px;
+}
+.moremargin {
+  margin-left: 15px;
+}
+</style>
+<div id="info">
+  <br><b>MafiEra Vote Tool 3000</b><br>
+</div>
+<div id="content">
+  <div class="comheader"><br><b>Usage</b></div>: Append the thread ID of the mafia game that needs to be scraped to the end of this page's URL.<br>
+  Note that this tool scrapes the entire thread, and it may take a while to finish loading.<br>
 
-<br>This tool brought to you by <b>Fireblend</b> :)<br>
+  <div class="comheader"><br><b>Examples:</b></div><br><br>
+  <div class="moremargin"><a href=https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712>https://frozen-refuge-64585.herokuapp.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712</a><br>
+    <a href=https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251>https://frozen-refuge-64585.herokuapp.com/buck-bumble-mafia-lets-rock.22251</a><br></div>
+
+    <div class="comheader"><br><b>Gamerunner Guide</b><br><br></div>
+    This tool works by scraping the ResetEra thread specified through the ID provided in the URL, and sequentially parsing each post, looking for specific <b>commands</b>.<br>
+    These commands are identified through being highlighted with color, so <b>be careful not to accidentally issue any of the following commands when writing in color</b> or it may break this tool.<br><br>
+
+    <div class="comheader"><B>Available Commands:</B></div><br><br>
+
+    <div id="content-guide">
+      <div class="comheader">Player commands:</div><br>
+      <div class="moremargin">- <B>VOTE: X</B>: Where X is any string. It can only be used during an active day phase (after a <b>DAY BEGINS</b> post and before a <b>DAY ENDS</b> one).<br>
+        - <B>UNVOTE: X</B>: Same restrictions as above. It removes the last active vote from the user. It's not necessary to use this command before every new <b>VOTE</b>.<br><br></div>
+
+        <div class="comheader">Gamerunner Commands:<br></div>
+        <div class="moremargin">- <B>DAY X BEGINS</B>: Where X is any string. It can be a number, or a written word. Signals the beginning of a day phase.<br>
+          - <B>DAY X ENDS</B>: Where X is any string. It can be a number, or a written word. Signals the end of a day phase.<br></div>
+        </div>
+
+        <br>This tool brought to you by <b>Fireblend</b> :)<br>
+      </div>
