@@ -123,9 +123,10 @@ input {
       var htmlContent = node.innerHTML;
       htmlContent = htmlContent.replace(/\n/g, '<br>\n');
       var text = node.textContent;
-
+      var activeVotesOnly = false;
       var elements = document.getElementsByClassName("not_active");
       if (elements[0].style.display === "none") {
+        activeVotesOnly = true;
         var replacement = "";
         var arrayOfLines = text.split("\n");
         var ignoreBreaks = false;
@@ -143,10 +144,14 @@ input {
         }
         text = replacement.trim()+"\n";
       }
+      var success = "Copied day BBCode to clipboard!";
+      if(activeVotesOnly){
+        success+= "\n(Warning: Copied active votes only!)";
+      }
 
       if (window.clipboardData && window.clipboardData.setData) {
           // IE specific code path to prevent textarea being shown while dialog is visible.
-          alert("Copied to clipboard!");
+          alert(success);
           return clipboardData.setData("Text", text);
 
       } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
@@ -158,11 +163,11 @@ input {
           try {
               return document.execCommand("copy");  // Security exception may be thrown by some browsers.
           } catch (ex) {
-              console.warn("Copy to clipboard failed.", ex);
+              console.warn("Copy to clipboard failed. Let Fireblend know!", ex);
               return false;
           } finally {
               document.body.removeChild(textarea);
-              alert("Copied to clipboard!");
+              alert(success);
           }
       }
   }
