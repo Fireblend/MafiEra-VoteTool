@@ -1,4 +1,4 @@
-# Deploying this Flask app to the cloud via Heroku
+# Deploying the MafiEra Vote Tool to the cloud via Heroku
 
 # Sign up for Heroku
 
@@ -6,11 +6,23 @@ Heroku, being a Software as a Service (SaaS)-type of service, requires you to cr
 
 You can create an account at this URL: [https://signup.heroku.com/dc](https://signup.heroku.com/dc)
 
+## Clone this repository and enter it using a command-line
+
+Download git, and execute the following command to clone out this repository:
+
+~~~sh
+$ git clone https://github.com/Fireblend/MafiEra-VoteTool.git
+~~~
+
+This will create a new directory called 'MafiEra-VoteTool' with this app's source code inside. Enter it (with the following 'cd' command) and follow the rest of this tutorial.
+
+~~~sh
+$ cd Mafiera-VoteTool
+~~~
+
 ## Download the Heroku toolbelt
 
 Heroku has a command-line "toolbelt" that we must download and install in order commands that will simplify our communication with the Heroku servers. The toolbelt can be downloaded at: [https://toolbelt.heroku.com/](https://toolbelt.heroku.com/)
-
-![image download-heroku-toolbelt.png](readme_assets/images/download-heroku-toolbelt.png)
 
 ## Authenticate with Heroku with `heroku login`
 
@@ -23,8 +35,6 @@ The first command you need to run is `heroku login`, which will ask you to enter
 ~~~sh
 $ heroku login
 ~~~
-
-![readme_assets/images/heroku-login.gif](readme_assets/images/heroku-login.gif)
 
 # Setting up our app's Git repo
 
@@ -99,10 +109,7 @@ And with that simple command, Heroku will go through the steps of taking our app
 
 (this process takes a lot longer than simply pushing code onto Github to save)
 
-After about 30 seconds, you'll get output telling you how to find your application on the web:
-
-
-![readme_assets/images/heroku-git-push.gif](readme_assets/images/heroku-git-push.gif)
+After about 30 seconds, you'll get output telling you how to find your application on the web.
 
 ~~~sh
 remote:        https://warm-scrubland-16039.herokuapp.com/ deployed to Heroku
