@@ -159,29 +159,29 @@ def bbCodePrintDay(day):
         activeVotes = countActiveVotes(day[player])
         if(activeVotes == 0):
             response += "<div class=\"not_active\">"
-        response+=("\n<br>[b][u]"+player+ "[/u][/b] ("+str(activeVotes)+" votes)<br>\n")
+        response+=("\n[b][u]"+player+ "[/u][/b] ("+str(activeVotes)+" votes)\n")
         if(activeVotes == 0):
             response += "</div>"
         for vote in voteList:
             if(vote['active']):
-                response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]<br>\n")
+                response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]\n")
             else:
-                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>\n</div>")
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
     return response
 
 def bbCodePrint(days, days_info, days_posts):
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<div class='day' id=\'day"+str(day_no+1)+"\'><br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>\n")
+        response+=("<div class='day' id=\'day"+str(day_no+1)+"\'>\n[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]\n")
         response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
-        response+="<br>\n"+bbCodePrintDay(days[day_no])
-        response+="\n<br>[b]Post Counts:[/b]<br>\n"
+        response+="\n"+bbCodePrintDay(days[day_no])
+        response+="\n[b]Post Counts:[/b]\n"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
-        response+="\n<br></div><br>\n"
+        response+="\n</div>\n"
     return response
 
 def totalCountPrint(days_posts):
