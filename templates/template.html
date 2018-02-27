@@ -118,12 +118,31 @@ input {
     }
   }
 
-
   function copyCurrentDay() {
       var node = document.getElementById('{{current_day_id|safe}}');
       var htmlContent = node.innerHTML;
       htmlContent = htmlContent.replace(/\n/g, '<br>\n');
       var text = node.textContent;
+
+      var elements = document.getElementsByClassName("not_active");
+      if (elements[0].style.display === "none") {
+        var replacement = "";
+        var arrayOfLines = text.split("\n");
+        var ignoreBreaks = false;
+        for(var i = 0; i < arrayOfLines.length; i++) {
+          line = arrayOfLines[i];
+          if(ignoreBreaks && line.trim() == ""){
+            continue;
+          }
+          if(line.indexOf("[/s]")==-1 && line.indexOf("(0 votes)")==-1){
+            replacement+=(line+"\n");
+          }
+          if(line.indexOf("(0 votes)")!=-1){
+            ignoreBreaks = true;
+          }
+        }
+        text = replacement.trim()+"\n";
+      }
 
       if (window.clipboardData && window.clipboardData.setData) {
           // IE specific code path to prevent textarea being shown while dialog is visible.
