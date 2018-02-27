@@ -159,29 +159,29 @@ def bbCodePrintDay(day):
         activeVotes = countActiveVotes(day[player])
         if(activeVotes == 0):
             response += "<div class=\"not_active\">"
-        response+=("<br>[b][u]"+player+ "[/u][/b] ("+str(activeVotes)+" votes)<br>")
+        response+=("\n<br>[b][u]"+player+ "[/u][/b] ("+str(activeVotes)+" votes)<br>\n")
         if(activeVotes == 0):
             response += "</div>"
         for vote in voteList:
             if(vote['active']):
-                response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]<br>")
+                response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]<br>\n")
             else:
-                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br></div>")
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>\n</div>")
     return response
 
 def bbCodePrint(days, days_info, days_posts):
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>")
+        response+=("<div class='day' id=\'day"+str(day_no+1)+"\'><br>[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]<br>\n")
         response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
-        response+="<br>"+bbCodePrintDay(days[day_no])
-        response+="<br>[b]Post Counts:[/b]<br>"
+        response+="<br>\n"+bbCodePrintDay(days[day_no])
+        response+="\n<br>[b]Post Counts:[/b]<br>\n"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
-        response+="<br><br>"
+        response+="\n<br></div><br>\n"
     return response
 
 def totalCountPrint(days_posts):
@@ -433,7 +433,7 @@ def gamePage(threadId):
 
     header+="<br><br>"
 
-    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, thread_id=threadId)
+    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
 @app.route('/<threadId>/test')
 def gamePageTest(threadId):
