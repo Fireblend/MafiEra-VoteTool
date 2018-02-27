@@ -75,36 +75,6 @@ That output tells us two things:
 1. Our application can be visited at: `https://boiling-journey-47934.herokuapp.com/`
 2. Heroku has git repo at the url `https://git.heroku.com/boiling-journey-47934.git`...In fact, the `create` command has helpfully set up a _remote_ named _heroku_ for us to __push__ to.
 
-If you visit your application's app, e.g. `https://some-funnyword-9999.herokuapp.com/`. you'll get a placeholder page:
-
-![image welcome-heroku.png](readme_assets/images/welcome-heroku.png)
-
-That's not what we programmed our app to do -- so that's just a page that comes from Heroku -- we haven't really deployed our app yet. But Heroku is ready for us. You can further confirm this by visiting [https://dashboard.heroku.com/](https://dashboard.heroku.com/) and seeing your application's URL at the bottom:
-
-![image heroku-dashboard.png](/readme_assets/images/heroku-dashboard.png)
-
-Clicking on that application entry will reveal a page that is empty of "processes":
-
-![image heroku-dashboard-initial-app.png](readme_assets/images/heroku-dashboard-initial-app.png)
-
-
-As for that Git repo that Heroku created for us...run this command to see the endpoints:
-
-~~~sh
-$ git remote show heroku
-~~~
-
-The output:
-
-~~~sh
-* remote heroku
-  Fetch URL: https://git.heroku.com/warm-scrubland-16039.git
-  Push  URL: https://git.heroku.com/warm-scrubland-16039.git
-  HEAD branch: (unknown)
-~~~
-
-
-
 ## Deploying our application code
 
 OK, let's finally __deploy our app__. We tell Heroku that we want to deploy our currently committed code by doing a `git push` to `heroku master`:
