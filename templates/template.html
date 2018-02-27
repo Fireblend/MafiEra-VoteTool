@@ -109,5 +109,23 @@ input {
       elements[i].style.display = newVal
     }
   }
+
+  function addLink(event) {
+        event.preventDefault();
+
+        var pagelink = '\n[b][u][url=\''+document.location.href+'\']Click here to go to the Vote Tool![/url][/u][/b]',
+            copytext =  window.getSelection() + pagelink;
+
+        if (window.clipboardData) {
+            window.clipboardData.setData('Text', copytext);
+        }
+
+        if (event.clipboardData) {
+            event.clipboardData.setData('Text', copytext);
+        }
+    }
+
+    document.addEventListener('copy', addLink);
+
   </script>
 </body>

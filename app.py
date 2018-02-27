@@ -156,12 +156,17 @@ def bbCodePrintDay(day):
     response = ""
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
-        response+=("<br>[b][u]"+player+ "[/u][/b] ("+str(countActiveVotes(day[player]))+" votes)<br>")
+        activeVotes = countActiveVotes(day[player])
+        if(activeVotes == 0):
+            response += "<div class=\"not_active\">"
+        response+=("<br>[b][u]"+player+ "[/u][/b] ("+str(activeVotes)+" votes)<br>")
+        if(activeVotes == 0):
+            response += "</div>"
         for vote in voteList:
             if(vote['active']):
                 response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]<br>")
             else:
-                response+=("[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br>")
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]<br></div>")
     return response
 
 def bbCodePrint(days, days_info, days_posts):
@@ -428,7 +433,7 @@ def gamePage(threadId):
 
     header+="<br><br>"
 
-    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header)
+    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, thread_id=threadId)
 
 @app.route('/<threadId>/test')
 def gamePageTest(threadId):
