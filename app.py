@@ -21,6 +21,7 @@ command_unvote= "unvote"
 command_day= "day"
 command_begins= "begins"
 command_ends= "ends"
+command_reset = "votes have been reset"
 
 # No active day atm
 current_day = None
@@ -376,6 +377,14 @@ def scrapeThread(thread_id):
                                 current_day = None
                                 current_day_info = None
                                 current_day_posts = None
+                                nextPost = True
+                                break
+                            #Handle vote reset command
+                            elif(command_reset in line):
+                                if current_day == None:
+                                    continue
+                                current_day = {}
+                                print("Votes have been reset!")
                                 nextPost = True
                                 break
                             #Handle unvote command
