@@ -16,7 +16,7 @@ base_thread_url = era_url+'threads/'
 
 #Commands
 command_vote= "vote:"
-command_doublevote= "double:" # <-- this isn't implemented yet
+command_doublevote= "double:"
 command_unvote= "unvote"
 command_day= "day"
 command_begins= "begins"
@@ -102,8 +102,8 @@ def removeActiveVote(user, day, link, post_num):
                 vote['unvote_num'] = post_num
 
 # Adds a new vote
-def addActiveVote(user, target, day, link, post_num):
-    toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None }
+def addActiveVote(user, target, day, link, post_num, double=False):
+    toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None, 'double':double }
     if target in day:
         day[target].append(toAppend)
     else:
@@ -114,7 +114,10 @@ def countActiveVotes(votes):
     activeVotes = 0
     for vote in votes:
         if(vote['active']):
-            activeVotes = activeVotes+1
+            if(vote['double']):
+                activeVotes = activeVotes+2
+            else:
+                activeVotes = activeVotes+1
     return activeVotes
 
 # The following 2 functions format the results into HTML
@@ -131,7 +134,12 @@ def htmlPrintDay(day):
         response += "<div class=\"votes\">"
         for vote in voteList:
             if(vote['active']):
-                response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
+                if (vote['double']):
+                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a> (Double)<br>")
+                else:
+                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
+            elif (vote['double']):
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a> (Double)<br></div>")
             else:
                 response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
         response += "</div>"
@@ -164,8 +172,13 @@ def bbCodePrintDay(day):
         if(activeVotes == 0):
             response += "</div>"
         for vote in voteList:
-            if(vote['active']):
-                response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]\n")
+            if vote['active']:
+                if vote['double']:
+                    response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u] (Double)\n")
+                else:
+                    response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]\n")
+            elif vote['double']:
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u] (Double)\n</div>")
             else:
                 response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
     return response
@@ -401,6 +414,14 @@ def scrapeThread(thread_id):
                                 print(currentUser+" VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum)
+                            #Handle doublevote command
+                            elif(command_doublevote in line):
+                                if current_day == None:
+                                    continue
+                                target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
+                                print(currentUser+" DOUBLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
+                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
+                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, True)
 
     if(current_day != None and len(current_day))>0:
         days.append(current_day)
