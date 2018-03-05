@@ -279,7 +279,7 @@ def scrapeThread(thread_id):
         print (e)
 
     # Load pages asynchronically, I'm a mad scientist
-    session = FuturesSession()
+    session = FuturesSession(max_workers=10)
     requests = []
 
     for p in range(lastPage, numPages + 1):
@@ -349,7 +349,7 @@ def scrapeThread(thread_id):
                     if nextPost:
                         break
                     #Check for color tags
-                    if action.has_attr('style') and 'color' in action['style']:
+                    if (action.has_attr('style') and 'color' in action['style']) or (action.has_attr('class') and 'bbHighlight' in action['class']):
                         #I'm removing bold tags here to simplify the command matching procedure
                         for match in action.findAll('b'):
                             match.replaceWithChildren()
@@ -418,7 +418,7 @@ def scrapeThread(thread_id):
                             elif(command_doublevote in line):
                                 if current_day == None:
                                     continue
-                                target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
+                                target = str(line).lower().partition(command_doublevote)[2].partition('<')[0].strip()
                                 print(currentUser+" DOUBLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, True)
