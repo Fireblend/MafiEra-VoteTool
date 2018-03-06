@@ -1,3 +1,4 @@
+import re
 import json
 import urllib.request
 from datetime import datetime
@@ -358,7 +359,7 @@ def scrapeThread(thread_id):
                             if nextPost:
                                 break
                             #If the day is starting, set the current day variable to a new day
-                            if(command_day in line and command_begins in line):
+                            if(bool(re.search("("+command_day+" .+ "+command_begins+")", line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
                                 current_day_posts = {}
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
@@ -366,7 +367,7 @@ def scrapeThread(thread_id):
                                 nextPost = True
                                 break
                             #If the day has ended, append the current day to the days variable and then clear it
-                            elif(command_day in line and command_ends in line):
+                            if(bool(re.search("("+command_day+" .+ "+command_ends+")", line, re.IGNORECASE))):
                                 if current_day == None:
                                     continue
                                 print("Day ends on "+currentPostNum+"("+currentLink+")")
