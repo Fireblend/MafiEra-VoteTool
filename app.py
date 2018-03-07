@@ -18,10 +18,10 @@ base_thread_url = era_url+'threads/'
 #Commands
 command_vote= "vote:"
 command_doublevote= "double:"
+command_triplevote= "triple:"
 command_unvote= "unvote"
-command_day= "day"
-command_begins= "begins"
-command_ends= "ends"
+command_day_ends= "(day .+ ends)"
+command_day_begins= "(day .+ begins)"
 command_reset = "votes have been reset"
 
 # No active day atm
@@ -35,6 +35,7 @@ current_day = None
 # Each VOTE is a dictionary with the following properties:
 #       sender:         the player who made the vote
 #       active:         a boolean value that marks whether the vote is active or not
+#       value:          a number that expresses the value of the vote (set to 1 by default, unless the double or triple command is used)
 #       vote_link:      a link to the vote post
 #       vote_num:       the post number of the vote
 #       unvote_link:    None if the vote is active, or a link to the post that made it inactive (either an unvote command, or a vote for another player)
@@ -103,8 +104,8 @@ def removeActiveVote(user, day, link, post_num):
                 vote['unvote_num'] = post_num
 
 # Adds a new vote
-def addActiveVote(user, target, day, link, post_num, double=False):
-    toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None, 'double':double }
+def addActiveVote(user, target, day, link, post_num, value=1):
+    toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None, 'value':value }
     if target in day:
         day[target].append(toAppend)
     else:
@@ -115,10 +116,7 @@ def countActiveVotes(votes):
     activeVotes = 0
     for vote in votes:
         if(vote['active']):
-            if(vote['double']):
-                activeVotes = activeVotes+2
-            else:
-                activeVotes = activeVotes+1
+            activeVotes = activeVotes+vote['value']
     return activeVotes
 
 # The following 2 functions format the results into HTML
@@ -135,12 +133,16 @@ def htmlPrintDay(day):
         response += "<div class=\"votes\">"
         for vote in voteList:
             if(vote['active']):
-                if (vote['double']):
+                if (vote['value'] == 2):
                     response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a> (Double)<br>")
+                elif (vote['value'] == 3):
+                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a> (Triple)<br>")
                 else:
                     response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
-            elif (vote['double']):
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a> (Double)<br></div>")
+            elif (vote['value'] == 2):
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
+            elif (vote['value'] == 3):
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
             else:
                 response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
         response += "</div>"
@@ -174,12 +176,16 @@ def bbCodePrintDay(day):
             response += "</div>"
         for vote in voteList:
             if vote['active']:
-                if vote['double']:
+                if vote['value']==2:
                     response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u] (Double)\n")
+                elif vote['value']==3:
+                    response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u] (Triple)\n")
                 else:
                     response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u]\n")
-            elif vote['double']:
-                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u] (Double)\n</div>")
+            elif vote['value']==2:
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u] (Double)[/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
+            elif vote['value']==3:
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u] (Triple)[/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
             else:
                 response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['vote_link'] +"']"+vote['vote_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
     return response
@@ -359,7 +365,7 @@ def scrapeThread(thread_id):
                             if nextPost:
                                 break
                             #If the day is starting, set the current day variable to a new day
-                            if(bool(re.search("("+command_day+" .+ "+command_begins+")", line, re.IGNORECASE))):
+                            if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
                                 current_day_posts = {}
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
@@ -367,7 +373,7 @@ def scrapeThread(thread_id):
                                 nextPost = True
                                 break
                             #If the day has ended, append the current day to the days variable and then clear it
-                            if(bool(re.search("("+command_day+" .+ "+command_ends+")", line, re.IGNORECASE))):
+                            if(bool(re.search(command_day_ends, line, re.IGNORECASE))):
                                 if current_day == None:
                                     continue
                                 print("Day ends on "+currentPostNum+"("+currentLink+")")
@@ -422,7 +428,15 @@ def scrapeThread(thread_id):
                                 target = str(line).lower().partition(command_doublevote)[2].partition('<')[0].strip()
                                 print(currentUser+" DOUBLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
-                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, True)
+                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, 2)
+                            #Handle triple vote command
+                            elif(command_triplevote in line):
+                                if current_day == None:
+                                    continue
+                                target = str(line).lower().partition(command_triplevote)[2].partition('<')[0].strip()
+                                print(currentUser+" TRIPLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
+                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
+                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, 3)
 
     if(current_day != None and len(current_day))>0:
         days.append(current_day)
