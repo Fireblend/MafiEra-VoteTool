@@ -414,7 +414,7 @@ def scrapeThread(thread_id):
                                 print(currentUser+" UNVOTED"+ " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                             #Handle vote command
-                            elif(command_vote in line or command_double_):
+                            elif(command_vote in line):
                                 if current_day == None:
                                     continue
                                 target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
