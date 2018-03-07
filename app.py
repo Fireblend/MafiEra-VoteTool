@@ -364,6 +364,8 @@ def scrapeThread(thread_id, om=False):
 
             #Find all potential "actions"
             action_list = currentPost.find_all("span")
+            if(om):
+                action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
                 for action in action_list:
                     if nextPost:
