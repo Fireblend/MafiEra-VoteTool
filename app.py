@@ -11,9 +11,13 @@ from bs4 import BeautifulSoup, SoupStrainer
 ####            GLOBAL VARIABLES
 ############################################
 
-#Era Thread Base URL
+#Era Base URLs
 era_url = 'https://www.resetera.com/'
 base_thread_url = era_url+'threads/'
+
+#Outer Mafia Base URLs
+om_url = 'https://outermafia.com/'
+om_thread_url = om_url+'index.php?threads/'
 
 #Commands
 command_vote= "vote:"
@@ -67,9 +71,10 @@ days_posts = []
 
 #This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
 message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "postCount"]})
+mo_message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "messageDetails"]})
 
 # Returns a soup object from a URL
-def getSoup(url, isMessage=False):
+def getSoup(url, isMessage=False, isOM=False):
     #Load URL using Request library
     req = urllib.request.Request(
         url,
@@ -80,15 +85,17 @@ def getSoup(url, isMessage=False):
     )
     f = urllib.request.urlopen(req)
     #Transform it into a Soup object
-    result = getSoupFromText(f, isMessage)
+    result = getSoupFromText(f, isMessage, isOM)
     f.close()
     return result
 
 # Returns a soup object from text
-def getSoupFromText(f, isMessage=False):
+def getSoupFromText(f, isMessage=False, isOM=False):
     #If it's a thread page (isMessageFlag), we use the strainer we defined to only parse
     #what we care about. If not, we parse the entire page.
-    if isMessage:
+    if isMessage and isOM:
+        result = BeautifulSoup(f, 'lxml', parse_only=mo_message_list_strainer)
+    elif isMessage:
         result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
     else:
         result = BeautifulSoup(f, 'lxml')
@@ -220,9 +227,9 @@ def totalCountPrint(days_posts):
     return response
 
 # This function runs on the background for each page that is loaded asynchronically.
-def getSoupInBackground(sess, resp):
+def getSoupInBackground(sess, resp, isOM):
     # Loads the page into soup
-    era_page = getSoupFromText(resp.text, True)
+    era_page = getSoupFromText(resp.text, True, isOM)
 
     #These are the posts
     posts = era_page.find_all("div", {"class" : "messageContent"})
@@ -230,6 +237,8 @@ def getSoupInBackground(sess, resp):
     users = era_page.find_all("div", {"class" : "messageUserBlock"})
     #These are the links
     links = era_page.find_all("div", {"class" : "postCount"})
+    if(isOM):
+        links = era_page.find_all("div", {"class" : "messageDetails"})
 
     #Readies the data for this page in the background
     resp.data = {"posts":posts, "users":users, "links":links}
@@ -238,15 +247,19 @@ def getSoupInBackground(sess, resp):
 ####     MAIN SCRAPING FUNCTION
 ############################################
 
-def scrapeThread(thread_id):
+def scrapeThread(thread_id, om=False):
     # Store page in variable
     thread_url = base_thread_url+thread_id
+    if om:
+        thread_url = om_thread_url+thread_id
     era_page = getSoup(thread_url, False)
 
     # Find out how many pages there are
     pages = era_page.find("span", {"class" : "pageNavHeader"})
-    nav = pages.contents[0].split(" ")
-    numPages = int(nav[3])
+    numPages = 1
+    if(pages != None):
+        nav = pages.contents[0].split(" ")
+        numPages = int(nav[3])
 
     #Let's initialize some variables with empty values
     current_day = None
@@ -285,6 +298,9 @@ def scrapeThread(thread_id):
         print("No file found, or error loading file: ")
         print (e)
 
+    print("LAST PAGE: "+str(lastPage))
+    print("LAST POST: "+str(lastPost))
+
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession(max_workers=10)
     requests = []
@@ -293,7 +309,7 @@ def scrapeThread(thread_id):
         # Each page request gets added to the session, as well as the getSoupInBackground
         # function which lets us do some additional stuff on the background
         page_url = thread_url + "page-" + str(p)
-        requests.append(session.get(page_url, background_callback=getSoupInBackground))
+        requests.append(session.get(page_url, background_callback=lambda sess, resp: getSoupInBackground(sess, resp, om)))
 
     # For each page:
     for p in range(0, len(requests)):
@@ -324,6 +340,8 @@ def scrapeThread(thread_id):
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
             currentLink = era_url+links[i].find("a")['data-href'].partition("/permalink")[0];
+            if (om):
+                currentLink = om_url+links[i].find("a")['data-href'].partition("/permalink")[0];
             currentPostNum = links[i].find("a").string;
 
             if current_day_posts != None:
@@ -335,8 +353,9 @@ def scrapeThread(thread_id):
             # If we set a last day end post, meaning we loaded some previous game data,
             # skip all posts until the one after it, by comparing post numbers.
             if (lastPost != None):
-                currentPostInt = currentPostNum.replace("#", "").strip()
-                lastPostInt = lastPost.replace("#", "").strip()
+                currentPostInt = int(currentPostNum.replace("#", "").strip())
+                lastPostInt = int(lastPost.replace("#", "").strip())
+
                 #Ignore the post if its number is lower than last post
                 if(currentPostInt <= lastPostInt):
                     continue
@@ -351,6 +370,8 @@ def scrapeThread(thread_id):
 
             #Find all potential "actions"
             action_list = currentPost.find_all("span")
+            if(om):
+                action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
                 for action in action_list:
                     if nextPost:
@@ -480,9 +501,12 @@ def gamePage(threadId):
 
     return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
-@app.route('/<threadId>/test')
-def gamePageTest(threadId):
-    res = scrapeThread(threadId+"/")
+
+@app.route('/om/<threadId>')
+@app.route('/om/<threadId>/')
+def omGamePage(threadId):
+
+    res = scrapeThread(threadId+"/", True)
 
     hresponse = htmlPrint(res["days"], res["days_info"], res["days_posts"])
 
@@ -490,18 +514,25 @@ def gamePageTest(threadId):
     totals = totalCountPrint(res["days_posts"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
     header+="<img src=\""+res['banner_url']+"\" />"
 
     header+="<br><br>"
 
-    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header)
+    return render_template('template.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
     current_day = None
     days = []
     res = scrapeThread(threadId+"/")
+    return json.dumps(res)
+
+@app.route('/om/<threadId>/raw')
+def omRaw(threadId):
+    current_day = None
+    days = []
+    res = scrapeThread(threadId+"/", True)
     return json.dumps(res)
 
 if __name__ == '__main__':
