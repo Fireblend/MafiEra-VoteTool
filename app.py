@@ -229,7 +229,7 @@ def totalCountPrint(days_posts):
 # This function runs on the background for each page that is loaded asynchronically.
 def getSoupInBackground(sess, resp, isOM):
     # Loads the page into soup
-    era_page = getSoupFromText(resp.text, True, isMO)
+    era_page = getSoupFromText(resp.text, True, isOM)
 
     #These are the posts
     posts = era_page.find_all("div", {"class" : "messageContent"})
@@ -256,8 +256,10 @@ def scrapeThread(thread_id, om=False):
 
     # Find out how many pages there are
     pages = era_page.find("span", {"class" : "pageNavHeader"})
-    nav = pages.contents[0].split(" ")
-    numPages = int(nav[3])
+    numPages = 1
+    if(pages != None):
+        nav = pages.contents[0].split(" ")
+        numPages = int(nav[3])
 
     #Let's initialize some variables with empty values
     current_day = None
@@ -295,6 +297,9 @@ def scrapeThread(thread_id, om=False):
     except Exception as e:
         print("No file found, or error loading file: ")
         print (e)
+
+    print("LAST PAGE: "+str(lastPage))
+    print("LAST POST: "+str(lastPost))
 
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession(max_workers=10)
@@ -348,8 +353,9 @@ def scrapeThread(thread_id, om=False):
             # If we set a last day end post, meaning we loaded some previous game data,
             # skip all posts until the one after it, by comparing post numbers.
             if (lastPost != None):
-                currentPostInt = currentPostNum.replace("#", "").strip()
-                lastPostInt = lastPost.replace("#", "").strip()
+                currentPostInt = int(currentPostNum.replace("#", "").strip())
+                lastPostInt = int(lastPost.replace("#", "").strip())
+
                 #Ignore the post if its number is lower than last post
                 if(currentPostInt <= lastPostInt):
                     continue
@@ -498,7 +504,7 @@ def gamePage(threadId):
 
 @app.route('/om/<threadId>')
 @app.route('/om/<threadId>/')
-def gamePage(threadId):
+def omGamePage(threadId):
 
     res = scrapeThread(threadId+"/", True)
 
@@ -515,29 +521,18 @@ def gamePage(threadId):
 
     return render_template('template.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
-
-@app.route('/<threadId>/test')
-def gamePageTest(threadId):
-    res = scrapeThread(threadId+"/")
-
-    hresponse = htmlPrint(res["days"], res["days_info"], res["days_posts"])
-
-    bresponse = bbCodePrint(res["days"], res["days_info"], res["days_posts"])
-    totals = totalCountPrint(res["days_posts"])
-
-    header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
-    header+="<img src=\""+res['banner_url']+"\" />"
-
-    header+="<br><br>"
-
-    return render_template('template_test.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header)
-
 @app.route('/<threadId>/raw')
 def raw(threadId):
     current_day = None
     days = []
     res = scrapeThread(threadId+"/")
+    return json.dumps(res)
+
+@app.route('/om/<threadId>/raw')
+def omRaw(threadId):
+    current_day = None
+    days = []
+    res = scrapeThread(threadId+"/", True)
     return json.dumps(res)
 
 if __name__ == '__main__':
