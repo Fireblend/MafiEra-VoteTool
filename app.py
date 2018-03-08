@@ -537,7 +537,7 @@ def omRaw(threadId):
 @app.route('/<threadId>/simple')
 def simple(threadId):
     res = scrapeThread(threadId+"/")
-    last = len(res)-1
+    last = len(res["days"])-1
     hresponse = htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
     bresponse = bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
 
@@ -549,6 +549,7 @@ def simple(threadId):
 @app.route('/om/<threadId>/simple')
 def omSimple(threadId):
     res = scrapeThread(threadId+"/", True)
+    last = len(res["days"])-1
     hresponse = htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
     bresponse = bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
 
