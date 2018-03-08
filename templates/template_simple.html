@@ -8,6 +8,7 @@ a {
 }
 body {
   font-family: 'Ubuntu', sans-serif;
+  background-color: #ffffff;
 }
 img {
   width: 20%;
@@ -23,8 +24,20 @@ input {
   color: grey;
   display: inline;
 }
+#header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #eeeeee;
+  -webkit-box-shadow: 0 7px 8px rgba(0, 0, 0, 0.12);
+  -moz-box-shadow: 0 7px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 7px 8px rgba(0, 0, 0, 0.12);
+}
 #buttons {
+  margin-top: 14px;
   text-align: center;
+  margin-bottom: 14px;
 }
 #info {
   text-align: center;
@@ -32,7 +45,9 @@ input {
   font-size: 19px;
 }
 #content {
+  margin-top: 110px;
   margin-left: 15px;
+  overflow:auto;
 }
 .toggle {
     font-size : 16px;
@@ -70,13 +85,16 @@ input {
 </head>
 
 <body>
-<div id="content">
-
+<div id="header">
 <div id="buttons">
+  <a class="toggle" href="{{votetool|safe}}", target="_blank">Go to Full Vote Count</a><br><br>
   <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
   <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a><br><br>
   <a class="toggle" onclick="copyCurrentDay()" href="#">Copy Current Day's BBCode (experimental)</a>
 </div>
+</div>
+
+<div id="content">
 
     <div id="html_out">
       {{html|safe}}

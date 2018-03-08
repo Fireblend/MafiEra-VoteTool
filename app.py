@@ -19,6 +19,9 @@ base_thread_url = era_url+'threads/'
 om_url = 'https://outermafia.com/'
 om_thread_url = om_url+'index.php?threads/'
 
+#Vote Tool Base URLs
+vt_url = 'https://vote.fireblend.com/'
+
 #Commands
 command_vote= "vote:"
 command_doublevote= "double:"
@@ -541,7 +544,7 @@ def simple(threadId):
     hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
 
-    return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse)
+    return render_template('template_simple.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+threadId)
 
 @app.route('/om/<threadId>/simple')
 def omSimple(threadId):
@@ -552,7 +555,7 @@ def omSimple(threadId):
     hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
 
-    return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse)
+    return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+"/om/"+threadId)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True, threaded=True)
