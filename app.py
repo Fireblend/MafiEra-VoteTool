@@ -523,17 +523,36 @@ def omGamePage(threadId):
 
 @app.route('/<threadId>/raw')
 def raw(threadId):
-    current_day = None
-    days = []
     res = scrapeThread(threadId+"/")
     return json.dumps(res)
 
 @app.route('/om/<threadId>/raw')
 def omRaw(threadId):
-    current_day = None
-    days = []
     res = scrapeThread(threadId+"/", True)
     return json.dumps(res)
+
+@app.route('/<threadId>/simple')
+def simple(threadId):
+    res = scrapeThread(threadId+"/")
+    last = len(res)-1
+    hresponse = htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+    bresponse = bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+
+    hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+    bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+
+    return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse)
+
+@app.route('/om/<threadId>/simple')
+def omSimple(threadId):
+    res = scrapeThread(threadId+"/", True)
+    hresponse = htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+    bresponse = bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+
+    hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+    bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+
+    return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True, threaded=True)

@@ -1,0 +1,186 @@
+
+<head>
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu">
+</head>
+<style>
+a {
+  color: #f44141;
+}
+body {
+  font-family: 'Ubuntu', sans-serif;
+}
+img {
+  width: 20%;
+  height: auto;
+  box-shadow: 4px 4px 2px grey;
+}
+input {
+  font-size : 16px;
+  width: auto;
+  height: auto;
+}
+#striked {
+  color: grey;
+  display: inline;
+}
+#buttons {
+  text-align: center;
+}
+#info {
+  text-align: center;
+  width: auto;
+  font-size: 19px;
+}
+#content {
+  margin-left: 15px;
+}
+.toggle {
+    font-size : 16px;
+    border-style: solid;
+    border-width: 2px;
+    color: #383838;
+    margin-right: 3px;
+    box-shadow: 4px 4px 2px grey;
+    background-color: #d8d8d8;
+    padding: 3px;
+    text-decoration: none;
+    border-color: #383838;
+    border-radius: 25px;
+}
+.day {
+  white-space:pre-wrap;
+}
+.votes {
+  margin-left:8px;
+}
+.pname {
+  font-size: 18px;
+  display: inline;
+}
+.day_info {
+  margin-left:12px;
+}
+.day_title {
+  font-size: 19px;
+  display: inline;
+}
+</style>
+<head>
+  <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
+</head>
+
+<body>
+<div id="content">
+
+<div id="buttons">
+  <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
+  <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a><br><br>
+  <a class="toggle" onclick="copyCurrentDay()" href="#">Copy Current Day's BBCode (experimental)</a>
+</div>
+
+    <div id="html_out">
+      {{html|safe}}
+    </div>
+
+    <div id="bbcode_out" style="display:none">
+      {{bbcode|safe}}
+    </div>
+  </div>
+
+    <script>
+    function toggleFormat() {
+      var html = document.getElementById("html_out");
+      var bbcode = document.getElementById("bbcode_out");
+      if (html.style.display === "none") {
+        html.style.display = "block";
+        bbcode.style.display = "none";
+      } else {
+        html.style.display = "none";
+        bbcode.style.display = "block";
+      }
+    }
+
+    function toggleNAVotes() {
+      var elements = document.getElementsByClassName("not_active");
+      var newVal = "none";
+      if (elements[0].style.display === "none") {
+        newVal = "block";
+      }
+      for(var i=0; i<elements.length; i++) {
+        elements[i].style.display = newVal
+      }
+    }
+
+    function copyCurrentDay() {
+        var node = document.getElementById('day1');
+        var htmlContent = node.innerHTML;
+        htmlContent = htmlContent.replace(/\n/g, '<br>\n');
+        var text = node.textContent;
+        var activeVotesOnly = false;
+        var elements = document.getElementsByClassName("not_active");
+        if (elements[0].style.display === "none") {
+          activeVotesOnly = true;
+          var replacement = "";
+          var arrayOfLines = text.split("\n");
+          var ignoreBreaks = false;
+          for(var i = 0; i < arrayOfLines.length; i++) {
+            line = arrayOfLines[i];
+            if(ignoreBreaks && line.trim() == ""){
+              continue;
+            }
+            if(line.indexOf("[/s]")==-1 && line.indexOf("(0 votes)")==-1){
+              replacement+=(line+"\n");
+            }
+            if(line.indexOf("(0 votes)")!=-1){
+              ignoreBreaks = true;
+            }
+          }
+          text = replacement.trim()+"\n";
+        }
+        var success = "Copied day BBCode to clipboard!";
+        if(activeVotesOnly){
+          success+= "\n(Warning: Copied active votes only!)";
+        }
+
+        if (window.clipboardData && window.clipboardData.setData) {
+            // IE specific code path to prevent textarea being shown while dialog is visible.
+            alert(success);
+            return clipboardData.setData("Text", text);
+
+        } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+            var textarea = document.createElement("textarea");
+            textarea.textContent = text;
+            textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+            } catch (ex) {
+                console.warn("Copy to clipboard failed. Let Fireblend know!", ex);
+                return false;
+            } finally {
+                document.body.removeChild(textarea);
+                alert(success);
+            }
+        }
+    }
+
+    function addLink(event) {
+          event.preventDefault();
+
+          var pagelink = '\n[b][u][url=\''+document.location.href+'\']Click here to go to the Vote Tool![/url][/u][/b]',
+              copytext =  window.getSelection() + pagelink;
+
+          if (window.clipboardData) {
+              window.clipboardData.setData('Text', copytext);
+          }
+
+          if (event.clipboardData) {
+              event.clipboardData.setData('Text', copytext);
+          }
+      }
+
+      document.addEventListener('copy', addLink);
+
+    </script>
+</body>
