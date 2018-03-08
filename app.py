@@ -74,6 +74,8 @@ days_posts = []
 
 #This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
 message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "postCount"]})
+
+#This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
 mo_message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "messageDetails"]})
 
 # Returns a soup object from a URL
@@ -96,8 +98,11 @@ def getSoup(url, isMessage=False, isOM=False):
 def getSoupFromText(f, isMessage=False, isOM=False):
     #If it's a thread page (isMessageFlag), we use the strainer we defined to only parse
     #what we care about. If not, we parse the entire page.
+
+    #Use the OuterMafia strainer if this is an OM page.
     if isMessage and isOM:
         result = BeautifulSoup(f, 'lxml', parse_only=mo_message_list_strainer)
+    #If not, use the regular strainer.
     elif isMessage:
         result = BeautifulSoup(f, 'lxml', parse_only=message_list_strainer)
     else:
@@ -108,6 +113,9 @@ def getSoupFromText(f, isMessage=False, isOM=False):
 def removeActiveVote(user, day, link, post_num):
     for player in day:
         for vote in day[player]:
+            #There should only be one active vote per player at a time
+            #so once we find an active vote with the specified user as the sender,
+            #we mark it as inactive and update its unvote data.
             if vote['sender'] == user and vote['active']:
                 vote['active'] = False
                 vote['unvote_link'] = link
@@ -135,6 +143,7 @@ def htmlPrintDay(day):
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
         activeVotes = countActiveVotes(day[player])
+        #If the user has no active votes, we mark it with a special div class so we can filter it out later.
         if(activeVotes == 0):
             response += "<div class=\"not_active\">"
         response+=("<div class=\"pname\"><br><u><b>"+player+ "</b></u></div> ("+str(activeVotes)+" votes)<br>")
@@ -142,6 +151,7 @@ def htmlPrintDay(day):
             response += "</div>"
         response += "<div class=\"votes\">"
         for vote in voteList:
+            #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
             if(vote['active']):
                 if (vote['value'] == 2):
                     response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a> (Double)<br>")
@@ -179,12 +189,14 @@ def bbCodePrintDay(day):
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
         voteList = day[player]
         activeVotes = countActiveVotes(day[player])
+        #If the user has no active votes, we mark it with a special div class so we can filter it out later.
         if(activeVotes == 0):
             response += "<div class=\"not_active\">"
         response+=("\n[b][u]"+player+ "[/u][/b] ("+str(activeVotes)+" votes)\n")
         if(activeVotes == 0):
             response += "</div>"
         for vote in voteList:
+            #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
             if vote['active']:
                 if vote['value']==2:
                     response+=(vote['sender'] + " - [u][url='"+ vote['vote_link']+"']"+vote['vote_num']+"[/url][/u] (Double)\n")
@@ -240,6 +252,8 @@ def getSoupInBackground(sess, resp, isOM):
     users = era_page.find_all("div", {"class" : "messageUserBlock"})
     #These are the links
     links = era_page.find_all("div", {"class" : "postCount"})
+
+    #We use an alternative div name for OM since it's different there.
     if(isOM):
         links = era_page.find_all("div", {"class" : "messageDetails"})
 
@@ -291,8 +305,7 @@ def scrapeThread(thread_id, om=False):
         days_info = data["days_info"]
         days_posts = data["days_posts"]
         banner_url = data["banner_url"]
-
-
+        #We find out the last day end page and post numbers, so we can start scraping from that point.
         lastPage = days_info[len(days_info)-1]['page_end']
         lastPost = days_info[len(days_info)-1]['day_end_n']
 
@@ -300,9 +313,6 @@ def scrapeThread(thread_id, om=False):
     except Exception as e:
         print("No file found, or error loading file: ")
         print (e)
-
-    print("LAST PAGE: "+str(lastPage))
-    print("LAST POST: "+str(lastPost))
 
     # Load pages asynchronically, I'm a mad scientist
     session = FuturesSession(max_workers=10)
@@ -391,6 +401,7 @@ def scrapeThread(thread_id, om=False):
                             #If the day is starting, set the current day variable to a new day
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
+                                #Initialize new variables for the new day.
                                 current_day_posts = {}
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
@@ -404,6 +415,8 @@ def scrapeThread(thread_id, om=False):
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
                                 current_day_info['page_end'] = p+lastPage
+
+                                #Add the gathered data to the big response variables
                                 days.append(current_day)
                                 days_info.append(current_day_info)
                                 days_posts.append(current_day_posts)
@@ -418,6 +431,7 @@ def scrapeThread(thread_id, om=False):
                                     print("No file found, or error loading file: ")
                                     print (e)
 
+                                #Set day-related variables to none, since we're not in an active day phase
                                 current_day = None
                                 current_day_info = None
                                 current_day_posts = None
