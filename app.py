@@ -161,11 +161,11 @@ def htmlPrintDay(day):
                 else:
                     response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
             elif (vote['value'] == 2):
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
             elif (vote['value'] == 3):
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
             else:
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"'>"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"'>"+vote['unvote_num']+"</a><br></div>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
         response += "</div>"
     return response
 
@@ -174,9 +174,9 @@ def htmlPrint(days, days_info, days_posts):
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
         response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br></div>")
-        response+=("<a href='"+ day_info['day_start_l']+"'>Day Start</a> ")
+        response+=("<a href='"+ day_info['day_start_l']+"' target=\"_blank\">Day Start</a> ")
         if(day_info['day_end_l']!= None):
-            response+=("- <a href='"+ day_info['day_end_l']+"'>Day End</a>")
+            response+=("- <a href='"+ day_info['day_end_l']+"' target=\"_blank\">Day End</a>")
         response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no])
         response+="<br><b>Post Counts:</b><br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
@@ -299,7 +299,7 @@ def scrapeThread(thread_id, om=False):
     #if so, we load all game info and set variables so the scraper knows
     #which page and post to start scraping from.
     try:
-        file = open(thread_id.replace("/", "")+".json", "r")
+        file = open("gamecache/"+thread_id.replace("/", "")+".json", "r")
         text = file.read()
         data = json.loads(text)
         days = data["days"]
@@ -424,7 +424,7 @@ def scrapeThread(thread_id, om=False):
 
                                 #Update this game's file with day info
                                 try:
-                                    file = open(thread_id.replace("/", "")+".json", "w")
+                                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
                                     text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url})
                                     file.write(text)
                                     file.close()

@@ -81,7 +81,6 @@ input {
 }
 </style>
 <head>
-  <base target="_blank">
   <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
 </head>
 
@@ -89,7 +88,7 @@ input {
 <div id="header">
 <div id="buttons">
   <a class="toggle" href="{{votetool|safe}}", target="_blank">Go to Full Vote Count</a><br><br>
-  <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
+  <a class="toggle" onclick="toggleFormat()" href="#" target="">Toggle HTML/BBCode</a>
   <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a><br><br>
   <a class="toggle" onclick="copyCurrentDay()" href="#">Copy Current Day's BBCode (experimental)</a>
 </div>
@@ -137,7 +136,7 @@ input {
         var text = node.textContent;
         var activeVotesOnly = false;
         var elements = document.getElementsByClassName("not_active");
-        if (elements[0].style.display === "none") {
+        if (elements.length > 0 && elements[0].style.display === "none") {
           activeVotesOnly = true;
           var replacement = "";
           var arrayOfLines = text.split("\n");
