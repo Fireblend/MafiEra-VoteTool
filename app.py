@@ -591,7 +591,7 @@ def gen():
 @app.route('/mafiagen/<userseed>')
 @app.route('/mafiagen/<userseed>/')
 def genuserseed(userseed):
-    results = mafiagen.generate(int(userseed), True)
+    results = mafiagen.generate(userseed, True)
 
     seed = results[1]
     info = mafiagen.printInfo(results[2], results[0])

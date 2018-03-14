@@ -1,16 +1,21 @@
 import random
 import sys
+import string
 
 
 def printInfo(info, roles):
-  results = "<b>These are the numbers and codes generated for this setup:</b><br><br>\n"
+  results = "<b>These are the numbers and codes generated for this setup:</b><br>\n"
 
   for i, j in zip(info[0], info[1]):
       results += str(i)+"("+j+") "
 
-  results += "<br><br><b>Resulting Role Distribution:</b><br><br>\n"
+  results += "<br><br><b>Resulting Role Distribution:</b><br>\n"
 
   distro = {}
+  roles_town = ['Vanilla Townie', 'Doctor', '1-Shot Doctor', 'Cop', '1-Shot Cop', 'Vigilante', '1-Shot Vigilante', 'Innocent Child', 'Mason', 'Other Mason', 'Roleblocker', '1-Shot Roleblocker']
+  roles_scum = ['Mafia Goon', 'Mafia Roleblocker', 'Godfather']
+  roles_neutral = ['Serial Killer']
+
   distro['Vanilla Townie'] = roles.count('T')
   distro['Doctor'] = roles.count('D')
   distro['1-Shot Doctor'] = roles.count('d')
@@ -28,14 +33,38 @@ def printInfo(info, roles):
   distro['Godfather'] = roles.count('GF')
   distro['Serial Killer'] = roles.count('SK')
 
-  for role in distro:
+  results += "<div class=\"town\">"
+
+  for role in roles_town:
       rolename = role
       if distro[role] > 1:
           rolename += "s"
       if distro[role] > 0:
           results += str(distro[role])+" "+rolename+"<br>"
 
+  results += "</div>"
 
+  results += "<div class=\"scum\">"
+
+  for role in roles_scum:
+      rolename = role
+      if distro[role] > 1:
+          rolename += "s"
+      if distro[role] > 0:
+          results += str(distro[role])+" "+rolename+"<br>"
+
+  results += "</div>"
+
+  results += "<div class=\"neutral\">"
+
+  for role in roles_neutral:
+      rolename = role
+      if distro[role] > 1:
+          rolename += "s"
+      if distro[role] > 0:
+          results += str(distro[role])+" "+rolename+"<br>"
+
+  results += "</div>"
   return results
 
 def printRoles(roles):
@@ -43,6 +72,10 @@ def printRoles(roles):
   bbcode = ""
 
   roles = list(set(roles))
+  SORT_ORDER = {"T": 0, "D": 1, "d": 2, "C": 3, "c": 4, "V": 5, "v": 6, "i": 7, "M1": 8, "M2": 9, "B": 10, "b": 11, "G": 12, 'R':13, 'GF':14, 'SK':15}
+
+  roles.sort(key=lambda val: SORT_ORDER[val])
+
   for role in roles:
     if role == 'D':
       title = "Doctor"
@@ -136,7 +169,7 @@ def printRoles(roles):
     bbrole += wincon+"\n"
 
     htmlresult += htmlrole+"</div>"
-    bbcode += bbrole + "</div>"
+    bbcode += bbrole + "<br><br></div>"
 
   return [htmlresult+"</div>", "<div class=\"bbcode\">"+bbcode+"</div>"]
 
@@ -149,7 +182,7 @@ def generate(seed=0, useSeed=False):
   if(useSeed):
     random.seed(seed)
   else:
-    seed = random.randrange(sys.maxsize)
+    seed = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(12))
     random.seed(seed)
 
   print("Seed: "+str(seed))
