@@ -155,11 +155,11 @@ def htmlPrintDay(day):
             #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
             if(vote['active']):
                 if (vote['value'] == 2):
-                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a> (Double)<br>")
+                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Double)<br>")
                 elif (vote['value'] == 3):
-                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a> (Triple)<br>")
+                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Triple)<br>")
                 else:
-                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"'>"+vote['vote_num']+"</a><br>")
+                    response+=(vote['sender'] + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a><br>")
             elif (vote['value'] == 2):
                 response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
             elif (vote['value'] == 3):
