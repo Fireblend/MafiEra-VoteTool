@@ -28,6 +28,9 @@ input {
 #content {
   margin-left: 15px;
 }
+#refresh {
+  color: #888888;
+}
 .toggle {
     font-size : 16px;
     border-style: solid;
@@ -65,6 +68,12 @@ input {
   font-size: 19px;
   display: inline;
 }
+.abiheader {
+  font-weight: bold;
+}
+.winheader {
+  font-weight: bold;
+}
 </style>
 <head>
   <title>Mini Mafia Generator - Brought to you by Fireblend</title>
@@ -75,9 +84,9 @@ input {
 
     <div id="info"><div id="header"><b>Mini Mafia Generator</b> - Brought to you by Fireblend<br><br>
       Your seed is <b>{{seed|safe}}</b>.<br> You can recreate this setup by following <a href="https://vote.fireblend.com/mafiagen/{{seed|safe}}">this link</a>.<br>
-      This generator follows the <a href="https://wiki.mafiascum.net/index.php?title=C9%2B%2B">C9++ Setup Rules</a>.<br><br></div>
-
-      <div id="nums"> {{info|safe}}</div>
+      This generator follows the <a href="https://wiki.mafiascum.net/index.php?title=C9%2B%2B">C9++ Setup Rules</a>.<br></div><br>
+      <div id="nums"> {{info|safe}}</div><br>
+<div id="refresh">(Don't like this setup? Refresh this page!)</div>
     </div><br>
 
 

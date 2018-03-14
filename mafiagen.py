@@ -106,15 +106,15 @@ def printRoles(roles):
       wincon = "You win when all threats to the town have been eliminated and there is at least one town player alive."
 
     htmlrole = "<div class=\"role\">\n <div class=\"role-name\">" + title + "</div>\n"
-    bbrole = "<br><div class=\"role\">\n <div class=\"role-name\">" + title + "</div>\n<br>"
+    bbrole = "<div class=\"role\">\n <div class=\"role-name\">" + title + "</div>\n"
 
     htmlrole += "<div class=\"welcome\"> Welcome, [Player]! You're a <b>"+ title + "</b>"
     bbrole  += "Welcome, [Player]! You're a [b]"+ title + "[/b]"
 
     if(role in ['G', 'R', 'GF', 'M1', 'M2']):
-      htmlrole += " along with your partner(s) [Player] (and [Player])."
-      bbrole += " along with your partner(s) [Player] (and [Player])."
-    htmlrole += "</div>\n"
+      htmlrole += " along with your partner(s) [Player] (and [Player])"
+      bbrole += " along with your partner(s) [Player] (and [Player])"
+    htmlrole += "!</div><br>\n"
     bbrole += "<br><br>\n\n"
 
     htmlrole += "<div class=\"abiheader\">Abilities:</div>\n"
