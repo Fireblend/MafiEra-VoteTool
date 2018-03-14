@@ -1,0 +1,111 @@
+
+<head>
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu">
+</head>
+<style>
+a {
+  color: #f44141;
+}
+body {
+  font-family: 'Ubuntu', sans-serif;
+}
+input {
+  font-size : 16px;
+  width: auto;
+  height: auto;
+}
+#buttons {
+  text-align: center;
+}
+#header {
+  font-size: 19px;
+}
+#info {
+  margin-top: 30px;
+  text-align: center;
+  width: auto;
+}
+#content {
+  margin-left: 15px;
+}
+.toggle {
+    font-size : 16px;
+    border-style: solid;
+    border-width: 2px;
+    color: #383838;
+    margin-right: 3px;
+    box-shadow: 4px 4px 2px grey;
+    background-color: #d8d8d8;
+    padding: 3px;
+    text-decoration: none;
+    border-color: #383838;
+    border-radius: 25px;
+}
+.role-name {
+  color: #f44141;
+  font-size: 19px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.day {
+  white-space:pre-wrap;
+}
+.votes {
+  margin-left:8px;
+}
+.pname {
+  font-size: 18px;
+  display: inline;
+}
+.day_info {
+  margin-left:12px;
+}
+.day_title {
+  font-size: 19px;
+  display: inline;
+}
+</style>
+<head>
+  <title>Mini Mafia Generator - Brought to you by Fireblend</title>
+</head>
+
+<body>
+<div id="content">
+
+    <div id="info"><div id="header"><b>Mini Mafia Generator</b> - Brought to you by Fireblend<br><br>
+      Your seed is <b>{{seed|safe}}</b>.<br> You can recreate this setup by following <a href="https://vote.fireblend.com/mafiagen/{{seed|safe}}">this link</a>.<br>
+      This generator follows the <a href="https://wiki.mafiascum.net/index.php?title=C9%2B%2B">C9++ Setup Rules</a>.<br><br></div>
+
+      <div id="nums"> {{info|safe}}</div>
+    </div><br>
+
+
+  <div id="buttons">
+    <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
+  </div>
+<br><br>
+    <div id="html_out">
+      {{html|safe}}
+    </div>
+
+    <div id="bbcode_out" style="display:none">
+      {{bbcode|safe}}
+    </div>
+
+  </div>
+
+  <script>
+  function toggleFormat() {
+    var html = document.getElementById("html_out");
+    var bbcode = document.getElementById("bbcode_out");
+    if (html.style.display === "none") {
+      html.style.display = "block";
+      bbcode.style.display = "none";
+    } else {
+      html.style.display = "none";
+      bbcode.style.display = "block";
+    }
+  }
+  </script>
+</body>

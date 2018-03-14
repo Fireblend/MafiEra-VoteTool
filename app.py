@@ -1,4 +1,5 @@
 import re
+import mafiagen
 import json
 import urllib.request
 from datetime import datetime
@@ -571,6 +572,36 @@ def omSimple(threadId):
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
 
     return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+"/om/"+threadId)
+
+@app.route('/mafiagen')
+@app.route('/mafiagen/')
+def gen():
+    results = mafiagen.generate()
+
+    seed = results[1]
+    info = mafiagen.printInfo(results[2], results[0])
+
+    printInfo = mafiagen.printRoles(results[0])
+
+    html = printInfo[0]
+    bbcode = printInfo[1]
+
+    return render_template('template_gen.html', info=info, seed=seed, html=html, bbcode=bbcode)
+
+@app.route('/mafiagen/<userseed>')
+@app.route('/mafiagen/<userseed>/')
+def genuserseed(userseed):
+    results = mafiagen.generate(int(userseed), True)
+
+    seed = results[1]
+    info = mafiagen.printInfo(results[2], results[0])
+
+    printInfo = mafiagen.printRoles(results[0])
+
+    html = printInfo[0]
+    bbcode = printInfo[1]
+
+    return render_template('template_gen.html', info=info, seed=seed, html=html, bbcode=bbcode)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True, threaded=True)
