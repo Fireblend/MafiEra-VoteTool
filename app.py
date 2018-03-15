@@ -177,7 +177,10 @@ def htmlPrint(days, days_info, days_posts):
         response+=("<a href='"+ day_info['day_start_l']+"' target=\"_blank\">Day Start</a> ")
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"' target=\"_blank\">Day End</a>")
-        response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no])
+        if(len(days[day_no]) == 0):
+            response +="<div class=\"day_info\"><br>No votes have been cast!<br>"
+        else:
+            response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no])
         response+="<br><b>Post Counts:</b><br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="<u>"+ player + "</u>: "+str(days_posts[day_no][player])+"  "
@@ -221,7 +224,10 @@ def bbCodePrint(days, days_info, days_posts):
         response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
-        response+="\n"+bbCodePrintDay(days[day_no])
+        if(len(days[day_no]) == 0):
+            response += "\n\nNo votes have been cast!\n"
+        else:
+            response+="\n"+bbCodePrintDay(days[day_no])
         response+="\n[b]Post Counts:[/b]\n"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
@@ -477,7 +483,7 @@ def scrapeThread(thread_id, om=False):
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, 3)
 
-    if(current_day != None and len(current_day))>0:
+    if(current_day != None):
         days.append(current_day)
         days_info.append(current_day_info)
         days_posts.append(current_day_posts)
