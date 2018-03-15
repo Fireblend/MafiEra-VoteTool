@@ -266,7 +266,7 @@ def generate(seed=0, useSeed=False):
 
   #Add roleblockers
   if blockers % 2 == 0:
-    for x in range(blockers):
+    for x in range(blockers//2):
       roles.append('B')
     if blockers > 0:
       roles.append('b')
