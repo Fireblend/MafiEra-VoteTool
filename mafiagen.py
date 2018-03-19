@@ -189,7 +189,7 @@ def generate(seed=0, useSeed=False):
 
   #Generate random numbers and add basic codes
   for x in range(7):
-    val = random.randint(1,101)
+    val = random.randint(1,100)
     numbers.append(val)
 
     if(val <=50):
