@@ -30,10 +30,16 @@ def htmlPrintDay(day):
     return response
 
 def htmlPrint(days, days_info, days_posts):
+    days.reverse()
+    days_info.reverse()
+    days_posts.reverse()
+
+    total_days = len(days)
+
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(day_no+1)+" VOTES ==== </B><br></div>")
+        response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(total_days-day_no)+" VOTES ==== </B><br></div>")
         response+=("<a href='"+ day_info['day_start_l']+"' target=\"_blank\">Day Start</a> ")
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"' target=\"_blank\">Day End</a>")
@@ -45,6 +51,11 @@ def htmlPrint(days, days_info, days_posts):
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="<u>"+ player + "</u>: "+str(days_posts[day_no][player])+"  "
         response+="<br><br></div>"
+
+    days.reverse()
+    days_info.reverse()
+    days_posts.reverse()
+
     return response
 
 # The following 2 functions format the results into BBCode
@@ -77,10 +88,15 @@ def bbCodePrintDay(day):
     return response
 
 def bbCodePrint(days, days_info, days_posts):
+    days.reverse()
+    days_info.reverse()
+    days_posts.reverse()
+
+    total_days = len(days)
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<div class='day' id=\'day"+str(day_no+1)+"\'>\n[b] ==== DAY "+str(day_no+1)+" VOTES ==== [/b]\n")
+        response+=("<div class='day' id=\'day"+str(total_days-day_no)+"\'>\n[b] ==== DAY "+str(total_days-day_no)+" VOTES ==== [/b]\n")
         response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
@@ -92,6 +108,11 @@ def bbCodePrint(days, days_info, days_posts):
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             response+="[u]"+ player + "[/u]: "+str(days_posts[day_no][player])+"  "
         response+="\n</div>\n"
+
+    days.reverse()
+    days_info.reverse()
+    days_posts.reverse()
+
     return response
 
 def totalCountPrint(days_posts):
