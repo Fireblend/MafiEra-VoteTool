@@ -155,6 +155,7 @@ input {
           }
           text = replacement.trim()+"\n";
         }
+        text = text +'\n[b][u][url=\''+document.location.href+'\']Click here to go to the Vote Tool![/url][/u][/b]'
         var success = "Copied day BBCode to clipboard!";
         if(activeVotesOnly){
           success+= "\n(Warning: Copied active votes only!)";
@@ -182,23 +183,6 @@ input {
             }
         }
     }
-
-    function addLink(event) {
-          event.preventDefault();
-
-          var pagelink = '\n[b][u][url=\''+document.location.href+'\']Click here to go to the Vote Tool![/url][/u][/b]',
-              copytext =  window.getSelection() + pagelink;
-
-          if (window.clipboardData) {
-              window.clipboardData.setData('Text', copytext);
-          }
-
-          if (event.clipboardData) {
-              event.clipboardData.setData('Text', copytext);
-          }
-      }
-
-      document.addEventListener('copy', addLink);
 
     </script>
 </body>

@@ -81,25 +81,33 @@ def omRaw(threadId):
 def simple(threadId):
     res = votecount.scrapeThread(threadId+"/")
     last = len(res["days"])-1
-    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
-    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+    if(last>=0):
+        hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+        bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
 
-    hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
-    bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+        hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+        bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
 
-    return render_template('template_simple.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+threadId)
+        return render_template('template_simple.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+threadId)
+    else:
+        return "This is not a game thread, or the game hasn't started yet. Contact your gamerunner and/or Fireblend if you believe this is a tool error."
+
 
 @app.route('/om/<threadId>/simple/')
 def omSimple(threadId):
     res = votecount.scrapeThread(threadId+"/", True)
     last = len(res["days"])-1
-    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
-    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
 
-    hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
-    bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+    if(last>=0):
+        hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+        bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
 
-    return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+"/om/"+threadId)
+        hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+        bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
+        return render_template('template_simple.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, votetool=vt_url+"/om/"+threadId)
+    else:
+        return "This is not a game thread, or the game hasn't started yet. Contact your gamerunner and/or Fireblend if you believe this is a tool error."
+
 
 @app.route('/mafiagen/')
 def gen():
