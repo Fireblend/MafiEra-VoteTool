@@ -168,7 +168,6 @@ def scrapeThread(thread_id, om=False):
             numPages = int(nav[3])
     else:
         divs = era_page.find_all('div', {'class':'PageNav'})
-        print(divs)
         for div in divs:
             if div.has_attr("data-last"):
                 numPages = int(div["data-last"])
