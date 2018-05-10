@@ -236,10 +236,12 @@ def scrapeThread(thread_id, om=False):
         startPost = 0
         if p+lastPage == 1:
             #Try to grab a banner from the first post
-            banner_url = posts[0].find("img")["src"]
-            if '/' == banner_url[-1]:
-                banner_url[-1] = ' '
-            startPost = 3
+            img = posts[0].find("img")
+            if(img != None and img.has_attr('src')):
+                banner_url = img["src"]
+                if '/' == banner_url[-1]:
+                    banner_url[-1] = ' '
+                startPost = 3
 
         #For each post in this page:
         for i in range(startPost, len(posts)):
