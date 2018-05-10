@@ -159,11 +159,19 @@ def scrapeThread(thread_id, om=False):
     era_page = getSoup(thread_url, False)
 
     # Find out how many pages there are
-    pages = era_page.find("span", {"class" : "pageNavHeader"})
     numPages = 1
-    if(pages != None):
-        nav = pages.contents[0].split(" ")
-        numPages = int(nav[3])
+
+    if om:
+        pages = era_page.find("span", {"class" : "pageNavHeader"})
+        if(pages != None):
+            nav = pages.contents[0].split(" ")
+            numPages = int(nav[3])
+    else:
+        divs = era_page.find_all('div', {'class':'PageNav'})
+        print(divs)
+        for div in divs:
+            if div.has_attr("data-last"):
+                numPages = int(div["data-last"])
 
     #Let's initialize some variables with empty values
     current_day = None

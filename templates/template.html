@@ -158,6 +158,7 @@ input {
         text = replacement.trim()+'\n';
       }
       text = text +'\n[b][u][url=\''+document.location.href+'\']Click here to go to the Vote Tool![/url][/u][/b]'
+      text = text.trim();
       var success = "Copied BBCode to clipboard!";
       if(activeVotesOnly){
         success+= "\n(Warning: Copied active votes only!)";
