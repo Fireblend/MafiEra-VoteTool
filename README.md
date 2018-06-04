@@ -1,6 +1,6 @@
 # Deploying the MafiEra Vote Tool locally
 
-Requirements: Make sure to have both Python3 and pip3 installed on your computer, as well as git. I recommend using a Linux VM if using Windows. If you're using Ubuntu, execute:
+Requirements: Make sure to have both Python3 and pip3 installed on your computer, as well as git. I recommend using a Linux VM with Ubuntu if using Windows. If you're using Ubuntu, execute:
 
 ~~~sh
 $ sudo apt-get install python3 python3-pip git
@@ -20,11 +20,19 @@ This will create a new directory called 'MafiEra-VoteTool' with this app's sourc
 $ cd MafiEra-VoteTool
 ~~~
 
-Now install the required Python packages. It is recommended you do this in a virtual environment, but it is not required. Virtual Environments are independent groups of Python libraries, one for each project. Packages installed for one project will not affect other projects or the operating system’s packages. If you want to use a Virtual Environment, you may need to install an additional package (python3-venv on Ubuntu). If you don't want to use one, just execute the last line of the following:
+## Install required Python Packages and run the app
+
+It is recommended you use a virtual environment, but it is not required. Virtual Environments are independent groups of Python libraries, one for each project. Packages installed for one project will not affect other projects or the operating system’s packages. If you want to use a Virtual Environment, install the python3-venv package and activate the environment. If not, skip the following commands:
 
 ~~~sh
+$ sudo apt-get install python3-venv
 $ python3 -m venv venv
 $ . venv/bin/activate
+~~~
+
+Now install the requirements for the app (they should be installed in the venv directory if you're using a virtual env, or on the Python install path if not):
+
+~~~sh
 $ pip3 install -r requirements.txt
 ~~~
 
