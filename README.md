@@ -1,14 +1,14 @@
 # Deploying the MafiEra Vote Tool locally
 
-Requirements: Make sure to have both Python3 and pip3  installed on your computer. I recommend using a Linux VM if using Windows. If you're using Ubuntu, execute:
+Requirements: Make sure to have both Python3 and pip3 installed on your computer, as well as git. I recommend using a Linux VM if using Windows. If you're using Ubuntu, execute:
 
 ~~~sh
-$ sudo apt-get install python3 python3-pip
+$ sudo apt-get install python3 python3-pip git
 ~~~
 
 ## Clone this repository and enter it using a command-line
 
-Download git, and execute the following command to clone out this repository:
+Execute the following command to clone out this repository:
 
 ~~~sh
 $ git clone https://github.com/Fireblend/MafiEra-VoteTool.git
