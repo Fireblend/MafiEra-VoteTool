@@ -28,7 +28,7 @@ $ . venv/bin/activate
 $ pip3 install -r requirements.txt
 ~~~
 
-And run the built-in flask server:
+Finally, run the built-in flask server:
 
 ~~~sh
 $ python3 app.py
