@@ -26,8 +26,8 @@ command_vote= "vote:"
 command_doublevote= "double:"
 command_triplevote= "triple:"
 command_unvote= "unvote"
-command_day_ends= "(day .+ ends)"
-command_day_begins= "(day .+ begins)"
+command_day_ends= "(day (.+) ends)"
+command_day_begins= "(day (.+) begins)"
 command_reset = "votes have been reset"
 
 # No active day atm
@@ -176,6 +176,7 @@ def scrapeThread(thread_id, om=False):
     current_day = None
     current_day_info = None
     current_day_posts = None
+    current_day_name = None
     days = []
     days_info = []
     days_posts = []
@@ -297,6 +298,14 @@ def scrapeThread(thread_id, om=False):
                             #If the day is starting, set the current day variable to a new day
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
+
+                                print(line)
+
+                                #This is to use the day identifier as part of the title
+                                #of this day phase in the view of the data.
+                                m = re.search(command_day_begins, line, re.IGNORECASE)
+                                current_day_name = m.group(2)
+
                                 #Initialize new variables for the new day.
                                 current_day_posts = {}
                                 current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
@@ -311,6 +320,7 @@ def scrapeThread(thread_id, om=False):
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
                                 current_day_info['page_end'] = p+lastPage
+                                current_day_info['day_name'] = current_day_name
 
                                 #Add the gathered data to the big response variables
                                 days.append(current_day)
@@ -331,6 +341,7 @@ def scrapeThread(thread_id, om=False):
                                 current_day = None
                                 current_day_info = None
                                 current_day_posts = None
+                                current_day_name = None
                                 nextPost = True
                                 break
                             #Handle vote reset command

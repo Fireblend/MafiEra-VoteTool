@@ -39,7 +39,10 @@ def htmlPrint(days, days_info, days_posts):
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(total_days-day_no)+" VOTES ==== </B><br></div>")
+        if("day_name" in day_info):
+            response+=("<div class=\"day_title\"><br><B> ==== DAY "+day_info["day_name"].upper()+" VOTES ==== </B><br></div>")
+        else:
+            response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(total_days-day_no)+" VOTES ==== </B><br></div>")
         response+=("<a href='"+ day_info['day_start_l']+"' target=\"_blank\">Day Start</a> ")
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"' target=\"_blank\">Day End</a>")
@@ -96,7 +99,10 @@ def bbCodePrint(days, days_info, days_posts):
     response = ""
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
-        response+=("<div class='day' id=\'day"+str(total_days-day_no)+"\'>\n[b] ==== DAY "+str(total_days-day_no)+" VOTES ==== [/b]\n")
+        if("day_name" in day_info):
+            response+=("<div class='day' id=\'day"+str(total_days-day_no)+"\'>\n[b] ==== DAY "+day_info["day_name"].upper()+" VOTES ==== [/b]\n")
+        else:
+            response+=("<div class='day' id=\'day"+str(total_days-day_no)+"\'>\n[b] ==== DAY "+str(total_days-day_no)+" VOTES ==== [/b]\n")
         response+=("[u][url='"+ day_info['day_start_l']+"']Day Start[/url][/u] ")
         if(day_info['day_end_l']!= None):
             response+=("- [u][url='"+ day_info['day_end_l']+"']Day End[/url][/u]")
