@@ -1,3 +1,49 @@
+# Deploying the MafiEra Vote Tool locally
+
+Requirements: Make sure to have both Python3 and pip3 installed on your computer, as well as git. I recommend using a Linux VM with Ubuntu if using Windows. If you're using Ubuntu, execute:
+
+~~~sh
+$ sudo apt-get install python3 python3-pip git
+~~~
+
+## Clone this repository and enter it using a command-line
+
+Execute the following command to clone out this repository:
+
+~~~sh
+$ git clone https://github.com/Fireblend/MafiEra-VoteTool.git
+~~~
+
+This will create a new directory called 'MafiEra-VoteTool' with this app's source code inside. Enter it (with the following 'cd' command) and follow the rest of this tutorial.
+
+~~~sh
+$ cd MafiEra-VoteTool
+~~~
+
+## Install required Python Packages and run the app
+
+It is recommended you use a virtual environment, but it is not required. Virtual Environments are independent groups of Python libraries, one for each project. Packages installed for one project will not affect other projects or the operating system’s packages. If you want to use a Virtual Environment, install the python3-venv package and activate the environment. If not, skip the following commands:
+
+~~~sh
+$ sudo apt-get install python3-venv
+$ python3 -m venv venv
+$ . venv/bin/activate
+~~~
+
+Now install the requirements for the app (they should be installed in the venv directory if you're using a virtual env, or on the Python install path if not):
+
+~~~sh
+$ pip3 install -r requirements.txt
+~~~
+
+Finally, run the built-in flask server:
+
+~~~sh
+$ python3 app.py
+~~~
+
+It should prompt you to visit http://127.0.0.1:5000/ where the tool should now be running. Enjoy!
+
 # Deploying the MafiEra Vote Tool to the cloud via Heroku
 
 # Sign up for Heroku
