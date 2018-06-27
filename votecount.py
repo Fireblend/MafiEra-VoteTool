@@ -308,7 +308,7 @@ def scrapeThread(thread_id, om=False):
 
                                 #Initialize new variables for the new day.
                                 current_day_posts = {}
-                                current_day_info = {"day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
+                                current_day_info = {"day_name":current_day_name, "day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
                                 nextPost = True
                                 break
@@ -320,7 +320,6 @@ def scrapeThread(thread_id, om=False):
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
                                 current_day_info['page_end'] = p+lastPage
-                                current_day_info['day_name'] = current_day_name
 
                                 #Add the gathered data to the big response variables
                                 days.append(current_day)
