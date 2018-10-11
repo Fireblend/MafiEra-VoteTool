@@ -1,5 +1,7 @@
 import votecount
+import tracker
 import printutils
+import printutils_track
 import mafiagen
 import json
 from flask import Flask, render_template
@@ -51,6 +53,28 @@ def gamePage(threadId):
         return render_template('template_nogame.html')
 
     return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
+
+
+@app.route('/tracker/<threadId>/')
+def trackMoves(threadId):
+
+    res = tracker.scrapeThread(threadId+"/")
+
+    hresponse = printutils_track.htmlPrint(res["days"], res["days_info"], res["days_posts"])
+
+    bresponse = printutils_track.bbCodePrint(res["days"], res["days_info"], res["days_posts"])
+
+    header="<br><b>MafiEra Vote Tool 3000</b>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    if(res['banner_url'] != None):
+        header+="<img src=\""+res['banner_url']+"\" />"
+
+    header+="<br><br>"
+
+    if(len(res["days"])) == 0:
+        return render_template('template_nogame.html')
+
+    return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals="", banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
 
 @app.route('/om/<threadId>/')
