@@ -191,7 +191,7 @@ def scrapeThread(thread_id, om=False):
     #if so, we load all game info and set variables so the scraper knows
     #which page and post to start scraping from.
     try:
-        file = open("gamecache/"+thread_id.replace("/", "")+".json", "r")
+        file = open("gamecache/track_"+thread_id.replace("/", "")+".json", "r")
         text = file.read()
         data = json.loads(text)
         days = data["days"]
@@ -328,7 +328,7 @@ def scrapeThread(thread_id, om=False):
 
                                 #Update this game's file with day info
                                 try:
-                                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
+                                    file = open("gamecache/track_"+thread_id.replace("/", "")+".json", "w")
                                     text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url})
                                     file.write(text)
                                     file.close()
