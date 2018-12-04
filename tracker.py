@@ -68,7 +68,7 @@ days_posts = []
 ############################################
 
 #This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
-message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "postCount"]})
+message_list_strainer = SoupStrainer("div", {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
 mo_message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "messageDetails"]})
@@ -130,14 +130,16 @@ def getSoupInBackground(sess, resp, isOM):
     era_page = getSoupFromText(resp.text, True, isOM)
 
     #These are the posts
-    posts = era_page.find_all("div", {"class" : "messageContent"})
+    posts = era_page.find_all("div", {"class" : "bbWrapper"})
     #These are the users
-    users = era_page.find_all("div", {"class" : "messageUserBlock"})
+    users = era_page.find_all("div", {"class" : "message-userDetails"})
     #These are the links
-    links = era_page.find_all("div", {"class" : "postCount"})
+    links = era_page.find_all("div", {"class" : "message-attribution-opposite"})
 
     #We use an alternative div name for OM since it's different there.
     if(isOM):
+        posts = era_page.find_all("div", {"class" : "messageContent"})
+        users = era_page.find_all("div", {"class" : "messageUserInfo"})
         links = era_page.find_all("div", {"class" : "messageDetails"})
 
     #Readies the data for this page in the background
@@ -163,10 +165,10 @@ def scrapeThread(thread_id, om=False):
             nav = pages.contents[0].split(" ")
             numPages = int(nav[3])
     else:
-        divs = era_page.find_all('div', {'class':'PageNav'})
-        for div in divs:
-            if div.has_attr("data-last"):
-                numPages = int(div["data-last"])
+        aList = era_page.find_all('a', {'class':'pageNavSimple-el pageNavSimple-el--current'})
+        for a in aList:
+            numPages = int(a.get_text(strip=True).split(" of ")[1])
+            break
 
     #Let's initialize some variables with empty values
     current_day = None
@@ -245,7 +247,7 @@ def scrapeThread(thread_id, om=False):
             #Get the current post's content, the user, the link and the post number
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
-            currentLink = era_url+links[i].find("a")['data-href'].partition("/permalink")[0];
+            currentLink = era_url+links[i].find("a")['href'].partition("/permalink")[0];
             if (om):
                 currentLink = om_url+links[i].find("a")['data-href'].partition("/permalink")[0];
             currentPostNum = links[i].find("a").string;
@@ -259,8 +261,8 @@ def scrapeThread(thread_id, om=False):
             # If we set a last day end post, meaning we loaded some previous game data,
             # skip all posts until the one after it, by comparing post numbers.
             if (lastPost != None):
-                currentPostInt = int(currentPostNum.replace("#", "").strip())
-                lastPostInt = int(lastPost.replace("#", "").strip())
+                currentPostInt = int(currentPostNum.replace("#", "").replace(",", "").strip())
+                lastPostInt = int(lastPost.replace("#", "").replace(",", "").strip())
 
                 #Ignore the post if its number is lower than last post
                 if(currentPostInt <= lastPostInt):
@@ -270,7 +272,9 @@ def scrapeThread(thread_id, om=False):
                     lastPost = None
 
             #Extract quotes so we don't accidentally count stuff in quotes
-            hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock bbCodeQuote"})
+            hasQuote = currentPost.findAll("div", {"class": " bbCodeBlock bbCodeBlock--expandable bbCodeBlock--quote"})
+            if(om):
+                hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock bbCodeQuote"})
             for quote in hasQuote: # Skips quoted posts
                 quote.extract()
 
