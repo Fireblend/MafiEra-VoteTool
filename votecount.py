@@ -236,6 +236,15 @@ def scrapeThread(thread_id, om=False):
         #These are the links
         links = pageData["links"]
 
+        if(not om):
+            i = 0
+            while(i != len(links)):
+                lstr = links[i].find("a")['href'].partition("/permalink")[0]
+                if("#" in lstr or "threadmarks" in lstr):
+                    links.pop(i)
+                    i = i - 1
+                i = i+1
+
         #Let's skip the first 3 posts in the thread (usually rules)
         startPost = 0
         if p+lastPage == 1:
