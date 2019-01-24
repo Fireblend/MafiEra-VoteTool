@@ -1,4 +1,5 @@
 import votecount
+import votecount_beta
 import tracker
 import printutils
 import printutils_track
@@ -31,6 +32,11 @@ def favicon():
 def home():
     return render_template('index.html')
 
+
+@app.route('/beta/<threadId>/')
+def betaGamePage(threadId):
+    votecount_beta.scrapeThread(threadId+"/")
+    return render_template('index.html')
 
 @app.route('/<threadId>/')
 def gamePage(threadId):
