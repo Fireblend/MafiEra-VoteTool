@@ -2,6 +2,7 @@ import re
 import json
 import urllib.request
 import pandas as pd
+import formatter
 from datetime import datetime
 from requests_futures.sessions import FuturesSession
 
@@ -32,8 +33,8 @@ command_vote= "vote:"
 command_doublevote= "double:"
 command_triplevote= "triple:"
 command_unvote= "unvote"
-command_day_ends= "((.+) ends)"
-command_day_begins= "((.+) begins)"
+command_day_ends= "(day (.+) ends)"
+command_day_begins= "(day (.+) begins)"
 command_reset = "votes have been reset"
 
 # Dataframes
@@ -195,7 +196,7 @@ def scrapeThread(thread_id, om=False):
     session = FuturesSession(max_workers=10)
     requests = []
 
-    for p in range(lastPage, numPages + 1):
+    for p in range(int(lastPage), numPages + 1):
         # Each page request gets added to the session, as well as the getSoupInBackground
         # function which lets us do some additional stuff on the background
         page_url = thread_url + "page-" + str(p)
@@ -257,9 +258,6 @@ def scrapeThread(thread_id, om=False):
                 current_phase_info = pd.DataFrame()
                 phaseNum = 0
 
-            #if(len(current_phase_info) > 0):
-            #    print(phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_link"])
-
             # Increment post count only if the latest phase is active
             if(len(current_phase_info) > 0 and pd.isnull(phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_link"])):
                 if(len(players_df) > 0 and len(players_df[players_df.name == currentUser]) > 0):
@@ -268,14 +266,12 @@ def scrapeThread(thread_id, om=False):
                     players_df = players_df.append({"name":currentUser, "post_count_"+str(current_phase_info.phase_number):1}, ignore_index = True)
 
 
+            currentPostInt = int(currentPostNum.replace("#", "").replace(",", "").strip())
             # If we set a last day end post, meaning we loaded some previous game data,
             # skip all posts until the one after it, by comparing post numbers.
             if (lastPost != None):
-                currentPostInt = int(currentPostNum.replace("#", "").replace(",", "").strip())
-                lastPostInt = int(lastPost.replace("#", "").replace(",", "").strip())
-
                 #Ignore the post if its number is lower than last post
-                if(currentPostInt <= lastPostInt):
+                if(currentPostInt <= lastPost):
                     continue
                 #Mark last post as none so we don't have to make this comparison for future posts
                 else:
@@ -309,8 +305,6 @@ def scrapeThread(thread_id, om=False):
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
 
-                                print(line)
-
                                 #This is to use the day identifier as part of the title
                                 #of this day phase in the view of the data.
                                 m = re.search(command_day_begins, line, re.IGNORECASE)
@@ -321,7 +315,7 @@ def scrapeThread(thread_id, om=False):
                                 if(len(current_phase_info) > 0):
                                     phaseNum = current_phase_info.phase_number+1
 
-                                new_day_info = {"phase_name":current_day_name, "phase_start_link":currentLink, "phase_start_number":currentPostNum, "phase_start_page":p, "phase_start_timestamp":currentTimestamp, "phase_number":phaseNum, "phase_end_link":pd.np.nan, "phase_end_number":pd.np.nan, "phase_end_page":pd.np.nan, "phase_end_timestamp":pd.np.nan}
+                                new_day_info = {"phase_name":current_day_name, "phase_start_link":currentLink, "phase_start_number":currentPostInt, "phase_start_page":p+lastPage, "phase_start_timestamp":currentTimestamp, "phase_number":phaseNum, "phase_end_link":pd.np.nan, "phase_end_number":pd.np.nan, "phase_end_page":pd.np.nan, "phase_end_timestamp":pd.np.nan}
                                 phases_df = phases_df.append(new_day_info, ignore_index = True)
 
                                 current_phase_info = phases_df.loc[phases_df.phase_number.idxmax()]
@@ -332,16 +326,16 @@ def scrapeThread(thread_id, om=False):
                             if(bool(re.search(command_day_ends, line, re.IGNORECASE))):
                                 if len(current_phase_info) == 0:
                                     continue
-                                print("Day ends on "+currentPostNum+"("+currentLink+")")
+                                print("Day ends on "+currentPostNum)
                                 phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_link"] = currentLink
-                                phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_number"] = currentPostNum
+                                phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_number"] = currentPostInt
                                 phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_page"] = p+lastPage
                                 phases_df.loc[phases_df.phase_number.idxmax(), "phase_end_timestamp"] = currentTimestamp
 
                                 #Update this game's cache files with day info
-                                phases_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_phases.csv")
-                                players_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_players.csv")
-                                votes_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_votes.csv")
+                                phases_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_phases.csv",index=False)
+                                players_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_players.csv",index=False)
+                                votes_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_votes.csv",index=False)
 
                                 break
                             #Handle vote reset command
@@ -358,33 +352,31 @@ def scrapeThread(thread_id, om=False):
                             elif(command_unvote in line):
                                 if len(current_phase_info) == 0:
                                     continue
-                                print(currentUser+" UNVOTED"+ " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostNum, currentTimestamp)
+                                print(currentUser+" UNVOTED")
+                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostInt, currentTimestamp)
                             #Handle vote command
                             elif(command_vote in line):
                                 if len(current_phase_info) == 0:
                                     continue
                                 target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
-                                print(currentUser+" VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostNum, currentTimestamp)
-                                addActiveVote(currentUser, target, phaseNum, currentLink, currentPostNum, 1, currentTimestamp)
+                                print(currentUser+" -> "+ target)
+                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostInt, currentTimestamp)
+                                addActiveVote(currentUser, target, phaseNum, currentLink, currentPostInt, 1, currentTimestamp)
                             #Handle doublevote command
                             elif(command_doublevote in line):
                                 if len(current_phase_info) == 0:
                                     continue
                                 target = str(line).lower().partition(command_doublevote)[2].partition('<')[0].strip()
-                                print(currentUser+" DOUBLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostNum, currentTimestamp)
-                                addActiveVote(currentUser, target, phaseNum, currentLink, currentPostNum, 2, currentTimestamp)
+                                print(currentUser+" ->> "+ target)
+                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostInt, currentTimestamp)
+                                addActiveVote(currentUser, target, phaseNum, currentLink, currentPostInt, 2, currentTimestamp)
                             #Handle triple vote command
                             elif(command_triplevote in line):
                                 if len(current_phase_info) == 0:
                                     continue
                                 target = str(line).lower().partition(command_triplevote)[2].partition('<')[0].strip()
-                                print(currentUser+" TRIPLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostNum, currentTimestamp)
-                                addActiveVote(currentUser, target, phaseNum, currentLink, currentPostNum, 3, currentTimestamp)
-
-    phases_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_phases.csv")
-    players_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_players.csv")
-    votes_df.to_csv("gamecache_2.0/"+str(thread_id).replace("/","")+"_votes.csv")
+                                print(currentUser+" ->>> "+ target)
+                                removeActiveVote(currentUser, phaseNum, currentLink, currentPostInt, currentTimestamp)
+                                addActiveVote(currentUser, target, phaseNum, currentLink, currentPostInt, 3, currentTimestamp)
+                                
+    return formatter.format(votes_df, players_df, phases_df)
