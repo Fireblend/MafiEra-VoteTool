@@ -43,10 +43,10 @@ def gamePage(threadId):
 
     res = votecount.scrapeThread(threadId+"/")
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"])
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"])
 
-    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"])
-    totals = printutils.totalCountPrint(res["days_posts"])
+    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
+    totals = printutils.totalCountPrint(res["days_posts"], res["players"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
     header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
@@ -88,10 +88,10 @@ def omGamePage(threadId):
 
     res = votecount.scrapeThread(threadId+"/", True)
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"])
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"])
 
-    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"])
-    totals = printutils.totalCountPrint(res["days_posts"])
+    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
+    totals = printutils.totalCountPrint(res["days_posts"], res["players"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
     header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"

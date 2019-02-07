@@ -92,6 +92,30 @@ input {
   font-size: 19px;
   display: inline;
 }
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  border-radius: 6px;
+  padding: 5px 15px;
+
+  /* Position the tooltip */
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -40px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
 </style>
 <head>
   <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
