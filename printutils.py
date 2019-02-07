@@ -114,14 +114,15 @@ def getPlayerElement(sender, players):
     if(players[sender]["flip_post"] != None):
         name = "<a style=\"text-decoration:none\" href='"+  players[sender]["flip_post"] +"' target=\"_blank\">"+"💀 "+"</a>"+name
 
-    player_code = "<div class=\"tooltip\">" + name + "<span class=\"tooltiptext\">"
-    player_code += "<b>"+players[sender]["name"]+"</b> "
-    player_code += "<br><b>Pronouns:</b> "+players[sender]["pronouns"]
-    player_code += "<br><b>Timezone:</b> "+players[sender]["timezone"]
-    player_code += "<br><b>Status:</b> "+players[sender]["status"]
+    contents = "<b>"+players[sender]["name"]+"</b> "
+    contents += "<br><b>Pronouns:</b> "+players[sender]["pronouns"]
+    contents += "<br><b>Timezone:</b> "+players[sender]["timezone"]
+    contents += "<br><b>Status:</b> "+players[sender]["status"]
     if(players[sender]["replaces"] != None):
-        player_code += "<br><b>Replacing:</b> "+players[sender]["replaces"]
-    player_code += "</span></div>"
+        contents += "<br><b>Replacing:</b> "+players[players[sender]["replaces"]]["name"]
+
+    player_code = "<div class=\"tooltip\">" + name + "<span class=\"tooltiptext\">"
+    player_code = "<abbr rel=\"tooltip\" title=\""+contents+"\">" + name + "</abbr>"
 
     return player_code
 
