@@ -166,7 +166,7 @@ def getPlayerElement(sender, players, thread_url, addInfo):
     if(players[sender]["flip_post"] != None):
         name = "<a style=\"text-decoration:none\" href='"+  players[sender]["flip_post"] +"' target=\"_blank\">"+"💀 "+"</a>"+name
     if(addInfo):
-        name = "<a style=\"text-decoration:none\" href='"+  thread_url + "p/"+ sender + "' target=\"_blank\">"+"ℹ️ "+"</a>"+name
+        name = "<a style=\"text-decoration:none\" href='"+  thread_url + "p/"+ sender + "' target=\"_blank\">"+"🔍 "+"</a>"+name
 
     contents = "<b>"+players[sender]["name"]+"</b> "
     contents += "<br><b>Pronouns:</b> "+players[sender]["pronouns"]
@@ -322,10 +322,10 @@ def getVotedFor(days, players, player):
             for vote in sorted(day[player], key=lambda k: getNum(k['vote_num'])) :
                 target = vote['target']
 
-                if sender in top:
-                    top[sender] += 1
+                if target in top:
+                    top[target] += 1
                 else:
-                    top[sender] = 1
+                    top[target] = 1
 
                 player_code = getPlayerElement(target, players, None, False)
                 #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
