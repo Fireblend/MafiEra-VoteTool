@@ -490,5 +490,4 @@ def scrapeThread(thread_id, om=False):
         days.append(current_day)
         days_info.append(current_day_info)
         days_posts.append(current_day_posts)
-    print(players)
     return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players}

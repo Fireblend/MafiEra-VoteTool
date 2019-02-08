@@ -60,6 +60,24 @@ def gamePage(threadId):
 
     return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
+@app.route('/<threadId>/p/<player>')
+def userPage(threadId, player):
+
+    res = votecount.scrapeThread(threadId+"/")
+
+    general, votes_for, votes_by = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player)
+
+    header="<br><b>MafiEra Vote Tool 3000</b>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    if(res['banner_url'] != None):
+        header+="<img src=\""+res['banner_url']+"\" />"
+
+    header+="<br><br>"
+
+    if(len(res["days"])) == 0:
+        return render_template('template_nogame.html')
+
+    return render_template('template_user.html', thread_url=base_thread_url+threadId, general=general, votes_for=votes_for, votes_by=votes_by, banner=res["banner_url"], header=header)
 
 @app.route('/tracker/<threadId>/')
 def trackMoves(threadId):
@@ -104,6 +122,25 @@ def omGamePage(threadId):
         return render_template('template_nogame.html')
 
     return render_template('template.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
+
+@app.route('/om/<threadId>/p/<player>')
+def omUserPage(threadId, player):
+
+    res = votecount.scrapeThread(threadId+"/", True)
+
+    general, votes_for, votes_by = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player)
+
+    header="<br><b>MafiEra Vote Tool 3000</b>"
+    header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    if(res['banner_url'] != None):
+        header+="<img src=\""+res['banner_url']+"\" />"
+
+    header+="<br><br>"
+
+    if(len(res["days"])) == 0:
+        return render_template('template_nogame.html')
+
+    return render_template('template_user.html', thread_url=om_thread_url+threadId, general=general, votes_for=votes_for, votes_by=votes_by, banner=res["banner_url"], header=header)
 
 @app.route('/<threadId>/raw/')
 def raw(threadId):

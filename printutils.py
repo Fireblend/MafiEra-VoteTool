@@ -199,3 +199,133 @@ def countActiveVotes(votes):
         if(vote['active']):
             activeVotes = activeVotes+vote['value']
     return activeVotes
+
+
+
+# The following 2 functions format the results into HTML
+def htmlPrintPlayer(days, days_posts, players, player):
+    player = player.lower().strip()
+    player_data = players[player]
+
+    general = getGeneralInfo(days_posts, player_data, players, player)
+    voted_for = getVotedFor(days, players, player)
+    voted_by = getVotedBy(days, players, player)
+
+    return general, voted_for, voted_by
+
+def getGeneralInfo(days_posts, player_data, players, player):
+    totalPosts = 0
+    for day_no in range(0, len(days_posts)):
+        if(player in days_posts[day_no]):
+            totalPosts += days_posts[day_no][player]
+
+    response = "<br><h3>"+player_data["name"]+"</h3>"
+    response += "<b>Pronouns:</b> "+player_data["pronouns"]
+    response += "<br><b>Timezone:</b> "+player_data["timezone"]
+    response += "<br><b>Status:</b> "+player_data["status"]
+    if(player_data["replaces"] != None):
+        response += "<br><b>Replacing:</b> "+players[player_data["replaces"]]["name"]
+    response += "<br><b>Total posts:</b> "+str(totalPosts)
+    return response
+
+def getVotedBy(days, players, player):
+    votes = []
+    response = "<h3>Voted by:</h3>"
+    phase = 0
+    top = {}
+    for day in days:
+        phase+=1
+        if(player in day):
+            for vote in sorted(day[player], key=lambda k: getNum(k['vote_num'])) :
+                sender = vote['sender']
+
+                if sender in top:
+                    top[sender] += 1
+                else:
+                    top[sender] = 1
+
+                player_code = getPlayerElement(sender, players)
+                #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
+                if(vote['active']):
+                    if (vote['value'] == 2):
+                        response+=(player_code + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Double) (Phase "+str(phase)+")<br>" )
+                    elif (vote['value'] == 3):
+                        response+=(player_code + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Triple) (Phase "+str(phase)+")<br>")
+                    else:
+                        response+=(player_code + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Phase "+str(phase)+")<br>")
+                elif (vote['value'] == 2):
+                    response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Phase "+str(phase)+")<br></div>")
+                elif (vote['value'] == 3):
+                    response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Phase "+str(phase)+")<br></div>")
+                else:
+                    response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Phase "+str(phase)+")<br></div>")
+        else:
+            response += "No one!"
+
+
+        response += "<h3>Most voted by:</h3>"
+
+    top = [(k, top[k]) for k in sorted(top, key=top.get, reverse=True)]
+    for k in top:
+        response += "<b>"+k[0]+" </b>" + "("+str(k[1])+")<br>"
+
+    if(len(top) == 0):
+        response+="No one!"
+
+    return response
+
+def getVotedFor(days, players, player):
+    votes = []
+    response = "<h3>Voted for:</h3>"
+    phase = 0
+    for day in days:
+        phase+=1
+        for p in day:
+            for v in day[p]:
+                if v["sender"] == player:
+                    v["target"] = p
+                    v["phase"] = str(phase)
+                    votes.append(v)
+
+    for vote in sorted(votes, key=lambda k: k['vote_num']) :
+        sender = vote['target']
+        player_code = getPlayerElement(sender, players)
+        #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
+        if(vote['active']):
+            if (vote['value'] == 2):
+                response+=(player_code + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Double) (Phase "+vote["phase"]+")<br>" )
+            elif (vote['value'] == 3):
+                response+=(player_code + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Triple) (Phase "+vote["phase"]+")<br>")
+            else:
+                response+=(player_code + " - <a href='"+ vote['vote_link']+"' target=\"_blank\">"+vote['vote_num']+"</a> (Phase "+vote["phase"]+")<br>")
+        elif (vote['value'] == 2):
+            response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Phase "+vote["phase"]+")<br></div>")
+        elif (vote['value'] == 3):
+            response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Phase "+vote["phase"]+")<br></div>")
+        else:
+            response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['vote_link'] +"' target=\"_blank\">"+vote['vote_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Phase "+vote["phase"]+")<br></div>")
+
+    if(len(votes) == 0):
+        response+="No one!"
+
+    response += "<h3>Most voted for:</h3>"
+
+    top = {}
+    for vote in votes:
+        target = vote['target']
+        if target in top:
+            top[target] += 1
+        else:
+            top[target] = 1
+    top = [(k, top[k]) for k in sorted(top, key=top.get, reverse=True)]
+    for k in top:
+        response += "<b>"+k[0]+" </b>" + "("+str(k[1])+")<br>"
+
+    if(len(votes) == 0):
+        response+="No one!"
+
+    return response
+
+def getNum(num):
+    numi = int(num.replace("#", ""))
+    return numi
