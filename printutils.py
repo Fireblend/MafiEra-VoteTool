@@ -66,7 +66,7 @@ def htmlPrintDaySeq(day, players):
     response += "</div>"
     return response
 
-def htmlPrint(days, days_info, days_posts, players, seq):
+def htmlPrint(days, days_info, days_posts, players, thread_url, seq):
     days.reverse()
     days_info.reverse()
     days_posts.reverse()
@@ -106,7 +106,7 @@ def htmlPrint(days, days_info, days_posts, players, seq):
             response+="<div class=\"day_info\">"+htmlPrintDaySeq(days[day_no], players)
         response+="<br><b>Post Counts:</b><br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
-            player_code = getPlayerElement(player, players, None, False)
+            player_code = getPlayerElement(player, players, thread_url, True)
             response+="<u>"+ player_code + "</u>: "+str(days_posts[day_no][player])+"  "
         response+="<br><br></div>"
 
