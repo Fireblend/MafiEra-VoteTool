@@ -1,3 +1,5 @@
+import math
+
 # The following 2 functions format the results into HTML
 def htmlPrintDay(day, players):
     response = ""
@@ -40,6 +42,21 @@ def htmlPrint(days, days_info, days_posts, players):
     total_days = len(days)
 
     response = ""
+    alive = 0
+    dead = 0
+    alive_text = ""
+    dead_text = ""
+    for key in players:
+        if(players[key]["status"] == "alive"):
+            alive += 1
+            alive_text += players[key]["name"]+"<br>"
+        elif(players[key]["status"] == "dead"):
+            dead += 1
+            dead_text += players[key]["name"]+"<br>"
+
+    if(len(players)>0):
+        response+=("[ <b>Currently Alive</b>: <abbr rel=\"tooltip\" title=\""+alive_text+"\">" + str(alive) + "</abbr> | <b>Dead</b>: <abbr rel=\"tooltip\" title=\""+dead_text+"\">" + str(dead) + "</abbr> | <b>Simple Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
+
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
         if("day_name" in day_info):

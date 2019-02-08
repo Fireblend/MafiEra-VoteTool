@@ -361,6 +361,30 @@ def scrapeThread(thread_id, om=False):
                             line = line.lower()
                             if nextPost:
                                 break
+                            #Handle death command
+                            if(bool(re.search(command_death, line, re.IGNORECASE)) and len(players)>0):
+
+                                m = re.search(command_death, line, re.IGNORECASE)
+                                dead = m.group(2).partition('>')[2].strip()
+                                dead = dead.strip().lower()
+
+                                players[dead]["status"] = "dead"
+                                players[dead]["flip_post"] = currentLink
+                                if(players[dead]["replaces"] != None):
+                                    second = players[dead]["replaces"]
+                                    players[second]["flip_post"] = currentLink
+
+                            #Handle replacement command
+                            if(bool(re.search(command_replaced, line, re.IGNORECASE)) and len(players)>0):
+                                m = re.search(command_replaced, origLine, re.IGNORECASE)
+                                pronoun = m.group(2)
+                                newplayer = m.group(3)
+                                timezone = m.group(4)
+                                replaced = m.group(5).partition('<')[0].strip()
+
+                                players[newplayer.lower()] = {"pronouns":pronouns, "name":newplayer, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower()}
+                                players[replaced.lower()]["status"] = "replaced"
+
                             #If the day is starting, set the current day variable to a new day
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
@@ -374,6 +398,8 @@ def scrapeThread(thread_id, om=False):
 
                                 #Initialize new variables for the new day.
                                 current_day_posts = {}
+
+
                                 current_day_info = {"day_name":current_day_name, "day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
                                 nextPost = True
@@ -409,30 +435,6 @@ def scrapeThread(thread_id, om=False):
                                 current_day_name = None
                                 nextPost = True
                                 break
-                            #Handle death command
-
-                            if(bool(re.search(command_death, line, re.IGNORECASE)) and len(players)>0):
-
-                                m = re.search(command_death, line, re.IGNORECASE)
-                                dead = m.group(2).partition('>')[2].strip()
-                                dead = dead.strip().lower()
-
-                                players[dead]["status"] = "dead"
-                                players[dead]["flip_post"] = currentLink
-                                if(players[dead]["replaces"] != None):
-                                    second = players[dead]["replaces"]
-                                    players[second]["flip_post"] = currentLink
-
-                            #Handle replacement command
-                            if(bool(re.search(command_replaced, line, re.IGNORECASE)) and len(players)>0):
-                                m = re.search(command_replaced, origLine, re.IGNORECASE)
-                                pronoun = m.group(2)
-                                newplayer = m.group(3)
-                                timezone = m.group(4)
-                                replaced = m.group(5).partition('<')[0].strip()
-
-                                players[newplayer.lower()] = {"pronouns":pronouns, "name":newplayer, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower()}
-                                players[replaced.lower()]["status"] = "replaced"
 
                             #Handle vote reset command
                             elif(command_reset in line):
