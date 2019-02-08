@@ -98,17 +98,21 @@ input {
   </div>
 
   <div id="buttons">
-    <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
+    <a class="toggle" onclick="toggleFormat()" href="#">Toggle Top/Timeline/BBCode</a>
     <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a><br><br>
     <a class="togglec" onclick="copyCurrentDay()" href="#">Copy Current Day's BBCode</a>
   </div>
 
-    <div id="html_out">
+    <div id="html_out" style="display:block">
       {{html|safe}}
     </div>
 
     <div id="bbcode_out" style="display:none">
       {{bbcode|safe}}
+    </div>
+
+    <div id="html_seq" style="display:none">
+      {{html_seq|safe}}
     </div>
 
     <div id="posts_total">
@@ -123,12 +127,19 @@ input {
   function toggleFormat() {
     var html = document.getElementById("html_out");
     var bbcode = document.getElementById("bbcode_out");
-    if (html.style.display === "none") {
+    var html_seq = document.getElementById("html_seq");
+    if (html.style.display === "block") {
+      html.style.display = "none";
+      bbcode.style.display = "none";
+      html_seq.style.display = "block";
+    } else if (html_seq.style.display === "block") {
+      bbcode.style.display = "block";
+      html.style.display = "none";
+      html_seq.style.display = "none";
+    } else {
       html.style.display = "block";
       bbcode.style.display = "none";
-    } else {
-      html.style.display = "none";
-      bbcode.style.display = "block";
+      html_seq.style.display = "none";
     }
   }
 

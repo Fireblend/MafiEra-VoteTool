@@ -43,10 +43,10 @@ def gamePage(threadId):
 
     res = votecount.scrapeThread(threadId+"/")
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"])
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], True)
 
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
-    totals = printutils.totalCountPrint(res["days_posts"], res["players"])
+    totals = printutils.totalCountPrint(res["days_posts"], res["players"], vt_url+threadId+"/")
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
     header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
@@ -106,10 +106,14 @@ def omGamePage(threadId):
 
     res = votecount.scrapeThread(threadId+"/", True)
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"])
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], False)
+
+    hresponseseq = "No info available for legacy games!"
+    if(len(res["players"]) >0):
+        hresponseseq = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], True)
 
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
-    totals = printutils.totalCountPrint(res["days_posts"], res["players"])
+    totals = printutils.totalCountPrint(res["days_posts"], res["players"], vt_url+"om/"+threadId+"/")
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
     header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
@@ -121,7 +125,7 @@ def omGamePage(threadId):
     if(len(res["days"])) == 0:
         return render_template('template_nogame.html')
 
-    return render_template('template.html', thread_url=om_thread_url+threadId, html=hresponse, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
+    return render_template('template.html', thread_url=om_thread_url+threadId, html=hresponse, html_seq= hresponseseq, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
 @app.route('/om/<threadId>/p/<player>')
 def omUserPage(threadId, player):
