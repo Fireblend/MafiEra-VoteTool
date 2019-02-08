@@ -55,7 +55,7 @@ def htmlPrint(days, days_info, days_posts, players):
             dead_text += players[key]["name"]+"<br>"
 
     if(len(players)>0):
-        response+=("[ <b>Currently Alive</b>: <abbr rel=\"tooltip\" title=\""+alive_text+"\">" + str(alive) + "</abbr> | <b>Dead</b>: <abbr rel=\"tooltip\" title=\""+dead_text+"\">" + str(dead) + "</abbr> | <b>Simple Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
+        response+=("<br><br>Current Stats:<br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>:" + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
 
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
