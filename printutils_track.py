@@ -21,11 +21,11 @@ def htmlPrintDay(day):
                 else:
                     response+=(vote['sender'] + " - <a href='"+ vote['post_link']+"' target=\"_blank\">"+vote['post_num']+"</a><br>")
             elif (vote['value'] == 2):
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unpost_link']+"' target=\"_blank\">"+vote['unpost_num']+"</a><br></div>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a> (Double)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
             elif (vote['value'] == 3):
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unpost_link']+"' target=\"_blank\">"+vote['unpost_num']+"</a><br></div>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
             else:
-                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a></strike> </div> <a href='"+ vote['unpost_link']+"' target=\"_blank\">"+vote['unpost_num']+"</a><br></div>")
+                response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+vote['sender'] + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a><br></div>")
         response += "</div>"
     return response
 
@@ -80,11 +80,11 @@ def bbCodePrintDay(day):
                 else:
                     response+=(vote['sender'] + " - [u][url='"+ vote['post_link']+"']"+vote['post_num']+"[/url][/u]\n")
             elif vote['value']==2:
-                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u] (Double)[/s]  [u][url='"+ vote['unpost_link']+"']"+vote['unpost_num']+"[/url][/u]\n</div>")
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u] (Double)[/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
             elif vote['value']==3:
-                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u] (Triple)[/s]  [u][url='"+ vote['unpost_link']+"']"+vote['unpost_num']+"[/url][/u]\n</div>")
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u] (Triple)[/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
             else:
-                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u][/s]  [u][url='"+ vote['unpost_link']+"']"+vote['unpost_num']+"[/url][/u]\n</div>")
+                response+=("<div class=\"not_active\">[s]"+vote['sender'] + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
     return response
 
 def bbCodePrint(days, days_info, days_posts):
