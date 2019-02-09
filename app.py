@@ -44,11 +44,11 @@ def gamePage(threadId):
     res = votecount.scrapeThread(threadId+"/")
 
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, False)
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url)
 
     hresponseseq = "No info available for legacy games!"
     if(len(res["players"]) >0):
-        hresponseseq = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, True)
+        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], res["other_actions"], url, True)
 
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
@@ -112,11 +112,11 @@ def omGamePage(threadId):
     url = vt_url+"om/"+threadId+"/"
     res = votecount.scrapeThread(threadId+"/", True)
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, False)
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url)
 
     hresponseseq = "No info available for legacy games!"
     if(len(res["players"]) >0):
-        hresponseseq = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, True)
+        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"])
 
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
@@ -167,11 +167,13 @@ def simple(threadId):
     res = votecount.scrapeThread(threadId+"/")
     last = len(res["days"])-1
 
+    url = vt_url+threadId+"/"
+
     if(last<0):
         return render_template('template_nogame.html')
 
-    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
-    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], url)
+    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"])
 
     hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
@@ -184,11 +186,13 @@ def omSimple(threadId):
     res = votecount.scrapeThread(threadId+"/", True)
     last = len(res["days"])-1
 
+    url = vt_url+"om/"+threadId+"/"
+
     if(last<0):
         return render_template('template_nogame.html')
 
-    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
-    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]])
+    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], url)
+    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"])
 
     hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
