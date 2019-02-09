@@ -344,7 +344,7 @@ def getVotedBy(days, players, player):
     for day in days:
         phase+=1
         if(player in day):
-            for vote in sorted(day[player], key=lambda k: getNum(k['post_num'])) :
+            for vote in sorted(day[player], key=lambda k: getNum(k)) :
                 sender = vote['sender']
 
                 if sender in top:
@@ -390,7 +390,7 @@ def getVotedFor(days, players, player):
     for day in days:
         phase+=1
         if(player in day):
-            for vote in sorted(day[player], key=lambda k: getNum(k['post_num'])) :
+            for vote in sorted(day[player], key=lambda k: getNum(k)) :
                 target = vote['target']
 
                 if target in top:
