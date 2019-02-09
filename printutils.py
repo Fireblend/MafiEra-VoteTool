@@ -160,7 +160,6 @@ def getPlayerElement(sender, players, thread_url, addInfo):
     if(len(players) == 0):
         return sender
 
-
     name = players[sender]["name"]
 
     if(players[sender]["flip_post"] != None):
@@ -174,6 +173,8 @@ def getPlayerElement(sender, players, thread_url, addInfo):
     contents += "<br><b>Status:</b> "+players[sender]["status"]
     if(players[sender]["replaces"] != None):
         contents += "<br><b>Replacing:</b> "+players[players[sender]["replaces"]]["name"]
+    if(players[sender]["replaced_by"] != None):
+        contents += "<br><b>Replaced by:</b> "+players[players[sender]["replaced_by"]]["name"]
 
     player_code = "<div class=\"tooltip\">" + name + "<span class=\"tooltiptext\">"
     player_code = "<abbr rel=\"tooltip\" title=\""+contents+"\">" + name + "</abbr>"
@@ -256,12 +257,14 @@ def getGeneralInfo(days_posts, player_data, players, player):
         if(player in days_posts[day_no]):
             totalPosts += days_posts[day_no][player]
 
-    response = "<br><h3>"+player_data["name"]+"</h3>"
+    response = "<h3>"+player_data["name"]+"</h3>"
     response += "<b>Pronouns:</b> "+player_data["pronouns"]
     response += "<br><b>Timezone:</b> "+player_data["timezone"]
     response += "<br><b>Status:</b> "+player_data["status"]
     if(player_data["replaces"] != None):
         response += "<br><b>Replacing:</b> "+players[player_data["replaces"]]["name"]
+    if(player_data["replaced_by"] != None):
+        response += "<br><b>Replaced by:</b> "+players[player_data["replaced_by"]]["name"]
     response += "<br><b>Total posts:</b> "+str(totalPosts)
     return response
 
