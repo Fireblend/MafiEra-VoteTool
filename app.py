@@ -48,7 +48,7 @@ def gamePage(threadId):
 
     hresponseseq = "No info available for legacy games!"
     if(len(res["players"]) >0):
-        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], res["other_actions"], url, True)
+        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"])
 
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
