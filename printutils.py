@@ -371,7 +371,7 @@ def getVotedBy(days, players, player):
             response += "No one!"
 
 
-        response += "<h3>Most voted by:</h3>"
+    response += "<h3>Most voted by:</h3>"
 
     top = [(k, top[k]) for k in sorted(top, key=top.get, reverse=True)]
     for k in top:
@@ -417,7 +417,7 @@ def getVotedFor(days, players, player):
             response += "No one!"
 
 
-        response += "<h3>Most voted for:</h3>"
+    response += "<h3>Most voted for:</h3>"
 
     top = [(k, top[k]) for k in sorted(top, key=top.get, reverse=True)]
     for k in top:
