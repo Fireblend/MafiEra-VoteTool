@@ -118,7 +118,7 @@ def removeActiveVote(user, day, link, post_num):
 
 # Adds a new vote
 def addActiveVote(user, target, day, link, post_num, value=1):
-    toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None, 'value':value }
+    toAppend = {'sender': user, 'active': True, 'post_link': link, 'unvote_link':None, 'post_num': post_num, 'unvote_num':None, 'value':value }
     if target in day:
         day[target].append(toAppend)
     else:
