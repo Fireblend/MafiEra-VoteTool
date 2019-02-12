@@ -51,6 +51,7 @@ def htmlPrintDaySeq(days, players, other_actions):
     if(other_actions != None):
         allVotes += other_actions
 
+
     sortedVotes = sorted(allVotes, key=lambda k: getNum(k), reverse=True)
 
     for vote in sortedVotes:
@@ -98,7 +99,7 @@ def htmlPrintDaySeq(days, players, other_actions):
     response += "</div>"
     return response
 
-def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions=None):
+def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions=None, countdown=None):
     total_days = len(days)
 
     response = ""
@@ -118,13 +119,16 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
     if(len(players)>0):
         response+=("<br><br>Current Stats:<br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>:" + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
 
+        if(countdown != None):
+            response+=("<br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
+
         response+=("<div class=\"day_title\"><br><B> ==== GAME TIMELINE ==== </B><br></div>")
         response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
         response+="<br><br></div>"
 
     return response
 
-def htmlPrint(days, days_info, days_posts, players, thread_url):
+def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
     days.reverse()
     days_info.reverse()
     days_posts.reverse()
@@ -146,6 +150,9 @@ def htmlPrint(days, days_info, days_posts, players, thread_url):
 
     if(len(players)>0):
         response+=("<br><br>Current Stats:<br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>:" + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
+
+    if(countdown != None):
+        response+=("<br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
 
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
@@ -211,6 +218,7 @@ def bbCodePrintDay(day, players):
                 else:
                     vote_string=("<div class=\"not_active\">[s]"+name + " - [u][url='"+  vote['post_link'] +"']"+vote['post_num']+"[/url][/u][/s]  [u][url='"+ vote['unvote_link']+"']"+vote['unvote_num']+"[/url][/u]\n</div>")
             response+=vote_string
+
     return response
 
 def getNumElement(number, link, timestamp, striked=False):
@@ -249,7 +257,7 @@ def getPlayerElement(sender, players, thread_url, addInfo):
 
     return player_code
 
-def bbCodePrint(days, days_info, days_posts, players):
+def bbCodePrint(days, days_info, days_posts, players, countdown=None):
     days.reverse()
     days_info.reverse()
     days_posts.reverse()
@@ -275,8 +283,10 @@ def bbCodePrint(days, days_info, days_posts, players):
             if len(players) > 0:
                 name = players[player]["name"]
             response+="[u]"+ name + "[/u]: "+str(days_posts[day_no][player])+"  "
-        response+="\n</div>\n"
 
+        if(countdown != None):
+            response+=("\n\n[b]Current Countdown:[/b]\n[img]"+countdown+"[/img]")
+        response+="\n\n</div>\n\n"
     days.reverse()
     days_info.reverse()
     days_posts.reverse()

@@ -44,13 +44,13 @@ def gamePage(threadId):
     res = votecount.scrapeThread(threadId+"/")
 
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url)
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
 
     hresponseseq = "No info available for legacy games!"
     if(len(res["players"]) >0):
-        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"])
+        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"], countdown=res["countdown"])
 
-    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
+    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"], countdown=res["countdown"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
@@ -112,13 +112,13 @@ def omGamePage(threadId):
     url = vt_url+"om/"+threadId+"/"
     res = votecount.scrapeThread(threadId+"/", True)
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url)
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
 
     hresponseseq = "No info available for legacy games!"
     if(len(res["players"]) >0):
-        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"])
+        hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"], countdown=res["countdown"])
 
-    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"])
+    bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"], countdown=res["countdown"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
@@ -172,8 +172,8 @@ def simple(threadId):
     if(last<0):
         return render_template('template_nogame.html')
 
-    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], url)
-    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"])
+    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], url, countdown=res["countdown"])
+    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], countdown=res["countdown"])
 
     hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
@@ -191,8 +191,8 @@ def omSimple(threadId):
     if(last<0):
         return render_template('template_nogame.html')
 
-    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], url)
-    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"])
+    hresponse = printutils.htmlPrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], url, countdown=res["countdown"])
+    bresponse = printutils.bbCodePrint([res["days"][last]], [res["days_info"][last]], [res["days_posts"][last]], res["players"], countdown=res["countdown"])
 
     hresponse = hresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")
     bresponse = bresponse.replace("==== DAY 1 VOTES ====", "==== CURRENT VOTES ====")

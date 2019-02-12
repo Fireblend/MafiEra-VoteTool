@@ -219,7 +219,7 @@ def scrapeThread(thread_id, om=False):
     days_posts = []
     players = {}
     other_actions = []
-
+    countdown = None
     #Banner
     banner_url = None
 
@@ -456,6 +456,10 @@ def scrapeThread(thread_id, om=False):
 
                                 other_actions.append(toAppend)
 
+                                img = posts[i].find("img")
+                                if(img != None and img.has_attr('src')):
+                                    countdown = img["src"]
+
                                 break
                             #If the day has ended, append the current day to the days variable and then clear it
                             if(bool(re.search(command_day_ends, line, re.IGNORECASE))):
@@ -483,6 +487,10 @@ def scrapeThread(thread_id, om=False):
                                     print("No file found, or error loading file: ")
                                     print (e)
 
+                                img = posts[i].find("img")
+                                if(img != None and img.has_attr('src')):
+                                    countdown = img["src"]
+                                    
                                 #Set day-related variables to none, since we're not in an active day phase
                                 current_day = None
                                 current_day_info = None
@@ -545,4 +553,4 @@ def scrapeThread(thread_id, om=False):
         days.append(current_day)
         days_info.append(current_day_info)
         days_posts.append(current_day_posts)
-    return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions}
+    return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions, "countdown":countdown}
