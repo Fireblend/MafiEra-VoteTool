@@ -108,7 +108,30 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
     alive_text = ""
     dead_text = ""
 
+    response += htmlHeader(days, days_info, days_posts, players, thread_url, countdown)
+
+    response+=("<div class=\"day_title\"><br><B> ==== GAME TIMELINE ==== </B><br></div>")
+    response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
+    response+="<br><br></div>"
+
+    return response
+
+def htmlHeader(days, days_info, days_posts, players, thread_url, countdown=None):
+    if(len(players) == 0):
+        return ""
+
+    alive = 0
+    dead = 0
+    voting = 0
+    notvoting = 0
+    voting_text = ""
+    not_voting_text = ""
+    alive_text = ""
+    dead_text = ""
+    response = ""
+
     for key in players:
+        players[key]["voting"] = False
         if(players[key]["status"] == "alive"):
             alive += 1
             alive_text += players[key]["name"]+"<br>"
@@ -116,15 +139,23 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
             dead += 1
             dead_text += players[key]["name"]+"<br>"
 
-    if(len(players)>0):
-        response+=("<br><br>Current Stats:<br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>:" + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
+    for player in days[0]:
+        for vote in days[0][player]:
+            if(vote["active"] and players[vote["sender"]]["status"]!="replaced"):
+                players[vote["sender"]]["voting"] = True
 
-        if(countdown != None):
-            response+=("<br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
+    for key in players:
+        if(players[key]["voting"]):
+            voting += 1
+            voting_text += players[key]["name"]+"<br>"
+        elif(players[key]["status"]!="replaced"):
+            notvoting += 1
+            not_voting_text += players[key]["name"]+"<br>"
 
-        response+=("<div class=\"day_title\"><br><B> ==== GAME TIMELINE ==== </B><br></div>")
-        response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
-        response+="<br><br></div>"
+    response+=("<br><br><b>Current Stats:</b><br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>: " + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]")
+    response+=("<br>[ <abbr rel=\"tooltip\" title=\""+voting_text+"\"><b>Voting</b>: " + str(voting) + "</abbr> | <abbr rel=\"tooltip\" title=\""+not_voting_text+"\"><b>Not Voting</b>: " + str(notvoting) + "</abbr>  ]")
+    if(countdown != None):
+        response+=("<br><br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
 
     return response
 
@@ -136,23 +167,7 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
     total_days = len(days)
 
     response = ""
-    alive = 0
-    dead = 0
-    alive_text = ""
-    dead_text = ""
-    for key in players:
-        if(players[key]["status"] == "alive"):
-            alive += 1
-            alive_text += players[key]["name"]+"<br>"
-        elif(players[key]["status"] == "dead"):
-            dead += 1
-            dead_text += players[key]["name"]+"<br>"
-
-    if(len(players)>0):
-        response+=("<br><br>Current Stats:<br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>:" + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]<br>")
-
-    if(countdown != None):
-        response+=("<br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
+    response += htmlHeader(days, days_info, days_posts, players, thread_url, countdown)
 
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
@@ -167,6 +182,7 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
             response +="<div class=\"day_info\"><br>No votes have been cast!<br>"
         else:
             response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no], players)
+
         response+="<br><b>Post Counts:</b><br>"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             player_code = getPlayerElement(player, players, thread_url, True)
