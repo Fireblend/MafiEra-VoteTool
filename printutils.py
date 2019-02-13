@@ -442,5 +442,5 @@ def getVotedFor(days, players, player):
 
 def getNum(vote):
     num = vote['post_num']
-    numi = int(num.replace("#", ""))
+    numi = int(num.replace("#", "").replace(",",""))
     return numi
