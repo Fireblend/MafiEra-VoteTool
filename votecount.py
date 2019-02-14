@@ -411,6 +411,9 @@ def scrapeThread(thread_id, om=False):
                                 dead = m.group(2).partition('>')[2].strip()
                                 dead = dead.strip().lower()
 
+                                if not(dead in players):
+                                    continue
+
                                 players[dead]["status"] = "dead"
                                 players[dead]["flip_post"] = currentLink
                                 if(players[dead]["replaces"] != None):
@@ -490,7 +493,7 @@ def scrapeThread(thread_id, om=False):
                                 img = posts[i].find("img")
                                 if(img != None and img.has_attr('src')):
                                     countdown = img["src"]
-                                    
+
                                 #Set day-related variables to none, since we're not in an active day phase
                                 current_day = None
                                 current_day_info = None
