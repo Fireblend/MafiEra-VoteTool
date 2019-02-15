@@ -61,41 +61,42 @@ def htmlPrintDaySeq(days, players, other_actions):
         player_code_target = getPlayerElement(target, players, None, False)
 
         numElement = getNumElement(vote['post_num'], vote['post_link'], vote.get("timestamp", None))
-        response+= numElement+" - <b>"
 
+
+        prefix = numElement+" - <b>"
         if(vote['action'] == 'unvote'):
-            response+= player_code_sender+"</b> unvoted<br>"
+            response+= prefix+player_code_sender+"</b> unvoted<br>"
             continue
         elif(vote['action'] == 'replacement'):
-            response+= player_code_sender+"</b> was replaced by <b>"+player_code_target +"</b> <br>"
+            response+= prefix+player_code_sender+"</b> was replaced by <b>"+player_code_target +"</b> <br>"
             continue
         elif(vote['action'] == 'death'):
-            response+= player_code_target+"</b> was eliminated!<br>"
+            response+= prefix+player_code_target+"</b> was eliminated!<br>"
             continue
         elif(vote['action'] == 'day_start'):
-            response+="Day "+vote["day_name"]+" begins!</b><br><br>"
+            response+= prefix+"Day "+vote["day_name"]+" begins!</b><br><br>"
             continue
         elif(vote['action'] == 'day_end'):
-            response+="Day "+vote["day_name"]+" ends!</b><br>"
+            response+= prefix+"Day "+vote["day_name"]+" ends!</b><br>"
             continue
 
 
         #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
         if(vote['active']):
             if (vote['value'] == 2):
-                response+= (player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Double)<br>")
+                response+=  prefix+(player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Double)<br>")
             elif (vote['value'] == 3):
-                response+=(player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Triple)<br>")
+                response+=  prefix+(player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Triple)<br>")
             else:
-                response+=(player_code_sender + "</b> voted for <b>"+player_code_target+ "</b><br>")
+                response+=  prefix+(player_code_sender + "</b> voted for <b>"+player_code_target+ "</b><br>")
         else:
             unvoteElement = getNumElement(vote['unvote_num'], vote['unvote_link'], vote['unvote_timestamp'])
             if (vote['value'] == 2):
-                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\"><strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Double)</strike> </div> (Unvote: "+unvoteElement+")<br></div>")
+                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Double)</strike> </div> (Unvote: "+unvoteElement+")<br></div>")
             elif (vote['value'] == 3):
-                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\"><strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Triple)</strike> </div> (Unvote: "+unvoteElement+")<br></div>")
+                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Triple)</strike> </div> (Unvote: "+unvoteElement+")<br></div>")
             else:
-                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\"><strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> </strike> </div> (Unvote: "+unvoteElement+")<br></div>")
+                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> </strike> </div> (Unvote: "+unvoteElement+")<br></div>")
     response += "</div>"
     return response
 
@@ -335,15 +336,17 @@ def countActiveVotes(votes):
 
 
 # The following 2 functions format the results into HTML
-def htmlPrintPlayer(days, days_posts, players, player):
+def htmlPrintPlayer(days, days_posts, players, player, other_actions):
+    print(player)
     player = player.lower().strip()
     player_data = players[player]
 
     general = getGeneralInfo(days_posts, player_data, players, player)
     voted_for = getVotedFor(days, players, player)
     voted_by = getVotedBy(days, players, player)
+    timeline = htmlTimelinePlayer(player, days, players, other_actions)
 
-    return general, voted_for, voted_by
+    return general, voted_for, voted_by, timeline
 
 def getGeneralInfo(days_posts, player_data, players, player):
     totalPosts = 0
@@ -393,8 +396,6 @@ def getVotedBy(days, players, player):
                     response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Day "+str(phase)+")<br></div>")
                 else:
                     response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Day "+str(phase)+")<br></div>")
-        else:
-            response += "No one!"
 
 
     response += "<h3>Most voted by:</h3>"
@@ -441,8 +442,6 @@ def getVotedFor(days, players, player):
                     response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a> (Triple)</strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Day "+str(phase)+")<br></div>")
                 else:
                     response+=("<div class=\"not_active\"><div id=\"striked\"><strike>"+player_code + " - <a id=\"striked\" href='"+  vote['post_link'] +"' target=\"_blank\">"+vote['post_num']+"</a></strike> </div> <a href='"+ vote['unvote_link']+"' target=\"_blank\">"+vote['unvote_num']+"</a> (Day "+str(phase)+")<br></div>")
-        else:
-            response += "No one!"
 
 
     response += "<h3>Most voted for:</h3>"
@@ -455,6 +454,79 @@ def getVotedFor(days, players, player):
         response+="No one!"
 
     return response
+
+
+# The following 2 functions format the results into HTML
+def htmlTimelinePlayer(playerX, days, players, other_actions):
+    allVotes = []
+    for day in days:
+        for player in day:
+            allVotes+=(day[player])
+
+    if(other_actions != None):
+        allVotes += other_actions
+
+    sortedVotes = sorted(allVotes, key=lambda k: getNum(k), reverse=True)
+    response = "<h3>Player Activity</h3>"
+
+    for vote in sortedVotes:
+        sender = vote['sender']
+        target = vote['target']
+        player_code_sender = getPlayerElement(sender, players, None, False)
+        player_code_target = getPlayerElement(target, players, None, False)
+
+        if(vote['action'] != 'day_start' and vote['action'] != 'day_end' and vote['sender'] != playerX and vote['target'] != playerX):
+            continue
+
+        print(vote["action"])
+        print(vote["sender"])
+        print(vote["target"])
+        print("----")
+
+
+        numElement = getNumElement(vote['post_num'], vote['post_link'], vote.get("timestamp", None))
+        prefix = numElement+" - <b>"
+        if(vote['action'] == 'unvote'):
+            response+= prefix+player_code_sender+"</b> unvoted "
+            if(vote['target'] != None):
+                response+=player_code_target
+            response+="<br>"
+            continue
+        elif(vote['action'] == 'replacement'):
+            response+= prefix+player_code_sender+"</b> was replaced by <b>"+player_code_target +"</b> <br>"
+            continue
+        elif(vote['action'] == 'death'):
+            response+= prefix+player_code_target+"</b> was eliminated!<br>"
+            continue
+        elif(vote['action'] == 'day_start'):
+            response+= prefix+"Day "+vote["day_name"]+" begins!</b><br><br>"
+            continue
+        elif(vote['action'] == 'day_end'):
+            response+= prefix+"Day "+vote["day_name"]+" ends!</b><br>"
+            continue
+
+
+        #For each vote on the user, we need to check whether it's active or not, and whether it's a regular, double or triple vote.
+        if(vote['active']):
+            if (vote['value'] == 2):
+                response+=  prefix+(player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Double)<br>")
+            elif (vote['value'] == 3):
+                response+=  prefix+(player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Triple)<br>")
+            else:
+                response+=  prefix+(player_code_sender + "</b> voted for <b>"+player_code_target+ "</b><br>")
+        else:
+            unvoteElement = getNumElement(vote['unvote_num'], vote['unvote_link'], vote['unvote_timestamp'])
+            if (vote['value'] == 2):
+                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Double)</strike> </div> (Unvote: "+unvoteElement+")<br></div>")
+            elif (vote['value'] == 3):
+                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> (Triple)</strike> </div> (Unvote: "+unvoteElement+")<br></div>")
+            else:
+                response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> </strike> </div> (Unvote: "+unvoteElement+")<br></div>")
+    response += "</div>"
+    return response
+
+
+
 
 def getNum(vote):
     num = vote['post_num']

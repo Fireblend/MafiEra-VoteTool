@@ -9,13 +9,13 @@
 
 .columnR {
   float: left;
-  width: 50%;
+  width: 33%;
   padding-left: 60px;
 }
 
 .columnL {
   float: left;
-  width: 50%;
+  width: 33%;
   padding-right: 60px;
 
   text-align: right;
@@ -38,6 +38,8 @@ a {
 }
 body {
   font-family: 'Ubuntu', sans-serif;
+  padding-right: 10%;
+  padding-left:10%
 }
 img {
   width: 20%;
@@ -130,6 +132,9 @@ input {
       </div>
       <div class="columnR">
         {{votes_by|safe}}
+      </div>
+      <div class="columnR">
+        {{timeline|safe}}
       </div>
     </div>
 

@@ -70,7 +70,7 @@ def userPage(threadId, player):
 
     res = votecount.scrapeThread(threadId+"/")
 
-    general, votes_for, votes_by = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player)
+    general, votes_for, votes_by, timeline  = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player, res["other_actions"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
     header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
@@ -82,7 +82,7 @@ def userPage(threadId, player):
     if(len(res["days"])) == 0:
         return render_template('template_nogame.html')
 
-    return render_template('template_user.html', thread_url=base_thread_url+threadId, general=general, votes_for=votes_for, votes_by=votes_by, banner=res["banner_url"], header=header)
+    return render_template('template_user.html', thread_url=base_thread_url+threadId, general=general, votes_for=votes_for, votes_by=votes_by, banner=res["banner_url"], header=header, timeline=timeline)
 
 @app.route('/tracker/<threadId>/')
 def trackMoves(threadId):
@@ -138,7 +138,7 @@ def omUserPage(threadId, player):
 
     res = votecount.scrapeThread(threadId+"/", True)
 
-    general, votes_for, votes_by = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player)
+    general, votes_for, votes_by, timeline = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player, res["other_actions"])
 
     header="<br><b>MafiEra Vote Tool 3000</b>"
     header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
@@ -150,7 +150,7 @@ def omUserPage(threadId, player):
     if(len(res["days"])) == 0:
         return render_template('template_nogame.html')
 
-    return render_template('template_user.html', thread_url=om_thread_url+threadId, general=general, votes_for=votes_for, votes_by=votes_by, banner=res["banner_url"], header=header)
+    return render_template('template_user.html', thread_url=om_thread_url+threadId, general=general, votes_for=votes_for, votes_by=votes_by, timeline=timeline, banner=res["banner_url"], header=header)
 
 @app.route('/<threadId>/raw/')
 def raw(threadId):
