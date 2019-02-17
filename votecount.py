@@ -422,6 +422,12 @@ def scrapeThread(thread_id, om=False):
                                 toAppend = {'sender':None, 'target':dead, 'action':'death', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
                                 other_actions.append(toAppend)
 
+                                if(current_day != None):
+                                    for player in current_day:
+                                        for vote in current_day[player]:
+                                            if(vote["sender"]==dead.lower()):
+                                                removeActiveVote(dead.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
+
                             #Handle replacement command
                             if(bool(re.search(command_replaced, line, re.IGNORECASE)) and len(players)>0):
                                 m = re.search(command_replaced, origLine, re.IGNORECASE)
@@ -435,6 +441,12 @@ def scrapeThread(thread_id, om=False):
                                 players[replaced.lower()]["replaced_by"] = newplayer.lower()
                                 toAppend = {'sender':replaced.lower(), 'target':newplayer.lower(), 'action':'replacement', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
                                 other_actions.append(toAppend)
+
+                                if(current_day != None):
+                                    for player in current_day:
+                                        for vote in current_day[player]:
+                                            if(vote["sender"]==replaced.lower()):
+                                                removeActiveVote(replaced.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
 
                             #If the day is starting, set the current day variable to a new day
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):

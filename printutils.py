@@ -149,7 +149,7 @@ def htmlHeader(days, days_info, days_posts, players, thread_url, countdown=None)
         if(players[key]["voting"]):
             voting += 1
             voting_text += players[key]["name"]+"<br>"
-        elif(players[key]["status"]!="replaced"):
+        elif(players[key]["status"]!="replaced" and players[key]["status"]!="dead"):
             notvoting += 1
             not_voting_text += players[key]["name"]+"<br>"
 
@@ -294,6 +294,22 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
             response += "\n\nNo votes have been cast!\n"
         else:
             response+="\n"+bbCodePrintDay(days[day_no], players)
+
+        if(day_no == 0 and len(players) > 0):
+            not_voting_no = 0
+            not_voting = "\nNot voting: "
+            for player in days[0]:
+                for vote in days[0][player]:
+                    if(vote["active"] and players[vote["sender"]]["status"]!="replaced"):
+                        players[vote["sender"]]["voting"] = True
+
+            for key in players:
+                if((not players[key]["voting"] )and players[key]["status"]!="replaced" and players[key]["status"]!="dead"):
+                    not_voting += players[key]["name"]+", "
+                    not_voting_no += 1
+            if(not_voting_no > 0):
+                response += not_voting[:-2]+"\n"
+
         response+="\n[b]Post Counts:[/b]\n"
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
             name = player
@@ -301,8 +317,9 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
                 name = players[player]["name"]
             response+="[u]"+ name + "[/u]: "+str(days_posts[day_no][player])+"  "
 
-        if(countdown != None):
+        if(day_no == 0 and countdown != None):
             response+=("\n\n[b]Current Countdown:[/b]\n[img]"+countdown+"[/img]")
+
         response+="\n\n</div>\n\n"
     days.reverse()
     days_info.reverse()
