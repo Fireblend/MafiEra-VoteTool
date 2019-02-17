@@ -109,7 +109,7 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
     alive_text = ""
     dead_text = ""
 
-    response += htmlHeader(days, days_info, days_posts, players, thread_url, countdown)
+    response += htmlHeader(days[len(days)-1], days_info, days_posts, players, thread_url, countdown)
 
     response+=("<div class=\"day_title\"><br><B> ==== GAME TIMELINE ==== </B><br></div>")
     response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
@@ -117,10 +117,9 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
 
     return response
 
-def htmlHeader(days, days_info, days_posts, players, thread_url, countdown=None):
+def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
     if(len(players) == 0):
         return ""
-
     alive = 0
     dead = 0
     voting = 0
@@ -140,8 +139,8 @@ def htmlHeader(days, days_info, days_posts, players, thread_url, countdown=None)
             dead += 1
             dead_text += players[key]["name"]+"<br>"
 
-    for player in days[0]:
-        for vote in days[0][player]:
+    for player in day:
+        for vote in day[player]:
             if(vote["active"] and players[vote["sender"]]["status"]!="replaced"):
                 players[vote["sender"]]["voting"] = True
 
@@ -168,7 +167,7 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
     total_days = len(days)
 
     response = ""
-    response += htmlHeader(days, days_info, days_posts, players, thread_url, countdown)
+    response += htmlHeader(days[0], days_info, days_posts, players, thread_url, countdown)
 
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
@@ -297,7 +296,7 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
 
         if(day_no == 0 and len(players) > 0):
             not_voting_no = 0
-            not_voting = "\nNot voting: "
+            not_voting = "\n[b]Not voting:[/b] "
             for player in days[0]:
                 for vote in days[0][player]:
                     if(vote["active"] and players[vote["sender"]]["status"]!="replaced"):
@@ -354,7 +353,6 @@ def countActiveVotes(votes):
 
 # The following 2 functions format the results into HTML
 def htmlPrintPlayer(days, days_posts, players, player, other_actions):
-    print(player)
     player = player.lower().strip()
     player_data = players[player]
 
@@ -494,12 +492,6 @@ def htmlTimelinePlayer(playerX, days, players, other_actions):
 
         if(vote['action'] != 'day_start' and vote['action'] != 'day_end' and vote['sender'] != playerX and vote['target'] != playerX):
             continue
-
-        print(vote["action"])
-        print(vote["sender"])
-        print(vote["target"])
-        print("----")
-
 
         numElement = getNumElement(vote['post_num'], vote['post_link'], vote.get("timestamp", None))
         prefix = numElement+" - <b>"
