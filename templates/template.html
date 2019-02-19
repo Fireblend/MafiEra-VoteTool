@@ -37,10 +37,23 @@ input {
 #content {
   margin-left: 15px;
 }
-.column1 {
-  float: left;
-  width: 25%;
+
+@media (orientation: landscape) {
+  .column1 {
+    float: left;
+    width: 35%;
+    margin-left: 15px;
+  }
 }
+
+@media (orientation: portrait) {
+  .column1 {
+    float: left;
+    width: 100%;
+    margin-left: 15px;
+  }
+}
+
 .toggle {
     font-size : 16px;
     border-style: solid;
