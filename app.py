@@ -40,9 +40,12 @@ def betaGamePage(threadId):
 
 @app.route('/<threadId>/')
 def gamePage(threadId):
+
+    if(len(threadId.split("."))> 1):
+        return redirect(vt_url+threadId.split(".")[1]+"/")
+
     url = vt_url+threadId+"/"
     res = votecount.scrapeThread(threadId+"/")
-
 
     hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
 

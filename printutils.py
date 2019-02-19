@@ -1,5 +1,12 @@
 import math
 
+search_url = "https://www.resetera.com/search/1/?q=%2A&t=post&c[thread]=***GAMETHREAD***&c[users]=***PLAYER***&o=date"
+
+def getThreadId(url):
+    list = url.split("/")
+    if(list[-1] == ""):
+        return list[-2]
+    return list[-1]
 
 # The following 2 functions format the results into HTML
 def htmlPrintDay(day, players):
@@ -157,7 +164,7 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
     if(countdown != None):
         response+=("<br><br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
 
-    return response
+    return response+"<br>"
 
 def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
     days.reverse()
@@ -166,33 +173,36 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
 
     total_days = len(days)
 
-    response = ""
+    response = "<div class=\"column1\">"
     response += htmlHeader(days[0], days_info, days_posts, players, thread_url, countdown)
 
     for day_no in range(0, len(days)):
         day_info = days_info[day_no]
+
         if("day_name" in day_info):
             response+=("<div class=\"day_title\"><br><B> ==== DAY "+day_info["day_name"].upper()+" VOTES ==== </B><br></div>")
         else:
             response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(total_days-day_no)+" VOTES ==== </B><br></div>")
+        contents = ""
+
+        for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
+            contents+= players[player]["name"] + ": "+str(days_posts[day_no][player])+"<br>"
+
         response+=("<a href='"+ day_info['day_start_l']+"' target=\"_blank\">Day Start</a> ")
         if(day_info['day_end_l']!= None):
             response+=("- <a href='"+ day_info['day_end_l']+"' target=\"_blank\">Day End</a>")
+        response+=(" - <abbr rel=\"tooltip\" title=\""+contents+"\"><b>Post Counts</b></abbr><br>")
         if(len(days[day_no]) == 0):
             response +="<div class=\"day_info\"><br>No votes have been cast!<br>"
         else:
             response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no], players)
-
-        response+="<br><b>Post Counts:</b><br>"
-        for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
-            player_code = getPlayerElement(player, players, thread_url, True)
-            response+="<u>"+ player_code + "</u>: "+str(days_posts[day_no][player])+"  "
-        response+="<br><br></div>"
+        response+="<br></div>"
 
     days.reverse()
     days_info.reverse()
     days_posts.reverse()
 
+    response += "</div>"
     return response
 
 # The following 2 functions format the results into BBCode
@@ -246,7 +256,7 @@ def getNumElement(number, link, timestamp, striked=False):
     return title
 
 
-def getPlayerElement(sender, players, thread_url, addInfo):
+def getPlayerElement(sender, players, thread_url, addInfo=False, addIsoThread=None):
     if(sender == None):
         return None
 
@@ -254,11 +264,18 @@ def getPlayerElement(sender, players, thread_url, addInfo):
         return sender
 
     name = players[sender]["name"]
+    dead_icon = ""
+    iso_icon = ""
+    info_icon = ""
+
 
     if(players[sender]["flip_post"] != None):
-        name = "<a style=\"text-decoration:none\" href='"+  players[sender]["flip_post"] +"' target=\"_blank\">"+"💀 "+"</a>"+name
-    if(addInfo):
-        name = "<a style=\"text-decoration:none\" href='"+  thread_url + "p/"+ sender + "' target=\"_blank\">"+"🔍 "+"</a>"+name
+        dead_icon = "<abbr rel=\"tooltip\" title=\"Go to elimination post\">"
+        dead_icon = dead_icon+"<a style=\"text-decoration:none\" href='"+  players[sender]["flip_post"] +"' target=\"_blank\">"+"💀 "+"</a></abbr>"
+    if(addIsoThread):
+        iso_url = search_url.replace("***GAMETHREAD***", addIsoThread).replace("***PLAYER***",sender)
+        iso_icon = "<abbr rel=\"tooltip\" title=\"Searchs posts in thread\">"
+        iso_icon = iso_icon+"<a style=\"text-decoration:none\" href='"+  iso_url +"' target=\"_blank\">"+"🗒️"+"</a></abbr>"
 
     contents = "<b>"+players[sender]["name"]+"</b> "
     contents += "<br><b>Pronouns:</b> "+players[sender]["pronouns"]
@@ -268,10 +285,13 @@ def getPlayerElement(sender, players, thread_url, addInfo):
         contents += "<br><b>Replacing:</b> "+players[players[sender]["replaces"]]["name"]
     if(players[sender]["replaced_by"] != None):
         contents += "<br><b>Replaced by:</b> "+players[players[sender]["replaced_by"]]["name"]
+    if(addInfo):
+        contents += "<br>Click for More!"
+        name = "<a class=\"name\" style=\"text-decoration:none\" href='"+  thread_url + "p/"+ sender + "' target=\"_blank\">"+name+"</a>"
 
-    player_code = "<abbr rel=\"tooltip\" title=\""+contents+"\">" + name + "</abbr>"
+    player_code = "<abbr rel=\"tooltip\" title=\""+contents+"\">"+name+"</abbr>"
 
-    return player_code
+    return dead_icon+iso_icon+player_code
 
 def bbCodePrint(days, days_info, days_posts, players, countdown=None):
     days.reverse()
@@ -334,10 +354,16 @@ def totalCountPrint(days_posts, players, thread_url):
                 total_posts_count[player] += days_posts[day_no][player]
             else:
                 total_posts_count[player] = days_posts[day_no][player]
-    response="<br><br><b>Total Accumulated Post Counts:</b><br><div class=\"day_info\">"
+    response="<br><br><br><br><br><br><b><div class=\"day_title\">=== PLAYERS & POST COUNTS ===</div></b><br><div class=\"day_info\">"
     for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
         player_code = getPlayerElement(player, players, thread_url, True)
-        response+="<br><u>"+ player_code + "</u>: "+str(total_posts_count[player])+"  "
+
+        threadId = getThreadId(thread_url)
+        iso_url = search_url.replace("***GAMETHREAD***", threadId).replace("***PLAYER***",player)
+        iso_icon = "<abbr rel=\"tooltip\" title=\"See posts in thread\">"
+        iso_icon = iso_icon+"<a style=\"text-decoration:none\" href='"+  iso_url +"' target=\"_blank\">"+str(total_posts_count[player])+"</a></abbr>"
+
+        response+="<br><u>"+ player_code + "</u>: "+iso_icon
     response+="<br></div>"
     return response
 
