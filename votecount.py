@@ -101,7 +101,7 @@ other_actions = []
 message_list_strainer = SoupStrainer(["div", "header"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite", "message-attribution"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
-mo_message_list_strainer = SoupStrainer(["div", "abbr"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
+mo_message_list_strainer = SoupStrainer(["div", "span"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False, isOM=False):
@@ -177,7 +177,7 @@ def getSoupInBackground(sess, resp, isOM):
         posts = era_page.find_all("div", {"class" : "messageContent"})
         users = era_page.find_all("div", {"class" : "messageUserInfo"})
         links = era_page.find_all("div", {"class" : "messageDetails"})
-        timestamps = era_page.find_all("abbr", {"class" : "DateTime"})
+        timestamps = era_page.find_all("span", {"class" : "DateTime"})
 
     #Readies the data for this page in the background
     resp.data = {"posts":posts, "users":users, "links":links, "timestamps":timestamps}
@@ -338,6 +338,7 @@ def scrapeThread(thread_id, om=False):
                         print (e)
 
 
+        print(timestamps)
 
         #For each post in this page:
         for i in range(startPost, len(posts)):
