@@ -5,7 +5,7 @@ import printutils
 import printutils_track
 import mafiagen
 import json
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 
 #Era Base URLs
 era_url = 'https://www.resetera.com/'

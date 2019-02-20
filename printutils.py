@@ -116,11 +116,12 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
     alive_text = ""
     dead_text = ""
 
-    response += htmlHeader(days[len(days)-1], days_info, days_posts, players, thread_url, countdown)
 
+    response = "<div class=\"column1\">"
+    response += htmlHeader(days[len(days)-1], days_info, days_posts, players, thread_url, countdown)
     response+=("<div class=\"day_title\"><br><B> ==== GAME TIMELINE ==== </B><br></div>")
     response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
-    response+="<br><br></div>"
+    response+="<br><br></div></div>"
 
     return response
 
@@ -186,7 +187,10 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
         contents = ""
 
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
-            contents+= players[player]["name"] + ": "+str(days_posts[day_no][player])+"<br>"
+            name = player
+            if(len(players) > 0):
+                name = players[player]["name"]
+            contents+=  name + ": "+str(days_posts[day_no][player])+"<br>"
 
         response+=("<a href='"+ day_info['day_start_l']+"' target=\"_blank\">Day Start</a> ")
         if(day_info['day_end_l']!= None):
@@ -197,12 +201,15 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
         else:
             response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no], players)
         response+="<br></div>"
+        if(day_no == 0 and len(days)>1):
+            response+= "<a class=\"toggle\" onclick=\"toggleDays()\" href=\"#a\">See/hide previous days</a><br>"
+            response+= "<br><span class=\"old_days\">"
 
     days.reverse()
     days_info.reverse()
     days_posts.reverse()
 
-    response += "</div>"
+    response += "</span></div>"
     return response
 
 # The following 2 functions format the results into BBCode
