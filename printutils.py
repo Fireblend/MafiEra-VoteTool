@@ -80,6 +80,9 @@ def htmlPrintDaySeq(days, players, other_actions):
         elif(vote['action'] == 'death'):
             response+= prefix+player_code_target+"</b> was eliminated!<br>"
             continue
+        elif(vote['action'] == 'victory'):
+            response+= prefix+player_code_target+"</b> won the game!<br>"
+            continue
         elif(vote['action'] == 'day_start'):
             response+= prefix+"Day "+vote["day_name"]+" begins!</b><br><br>"
             continue
@@ -132,10 +135,12 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
     dead = 0
     voting = 0
     notvoting = 0
+    victory = 0
     voting_text = ""
     not_voting_text = ""
     alive_text = ""
     dead_text = ""
+    victory_text = ""
     response = ""
 
     for key in players:
@@ -146,6 +151,9 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
         elif(players[key]["status"] == "dead"):
             dead += 1
             dead_text += players[key]["name"]+"<br>"
+        elif(players[key]["status"] == "victory"):
+            victory += 1
+            victory_text += players[key]["name"]+"<br>"
 
     for player in day:
         for vote in day[player]:
@@ -156,12 +164,14 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
         if(players[key]["voting"]):
             voting += 1
             voting_text += players[key]["name"]+"<br>"
-        elif(players[key]["status"]!="replaced" and players[key]["status"]!="dead"):
+        elif(players[key]["status"]!="replaced" and players[key]["status"]!="dead" and players[key]["status"] !="victory"):
             notvoting += 1
             not_voting_text += players[key]["name"]+"<br>"
 
     response+=("<br><br><b>Current Stats:</b><br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>: " + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]")
-    response+=("<br>[ <abbr rel=\"tooltip\" title=\""+voting_text+"\"><b>Voting</b>: " + str(voting) + "</abbr> | <abbr rel=\"tooltip\" title=\""+not_voting_text+"\"><b>Not Voting</b>: " + str(notvoting) + "</abbr>  ]")
+    response+=("<br>[ <abbr rel=\"tooltip\" title=\""+voting_text+"\"><b>Voting</b>: " + str(voting) + "</abbr> | <abbr rel=\"tooltip\" title=\""+not_voting_text+"\"><b>Not Voting</b>: " + str(notvoting) + "</abbr> ]")
+    if(victory > 0):
+        response+=("<br>[ <abbr rel=\"tooltip\" title=\""+victory_text+"\"><b>Winners</b>: " + str(victory) + "</abbr> ]")
     if(countdown != None):
         response+=("<br><br><b>Current Countdown:</b><br><img id=\"countdown\" src=\""+countdown+"\"/><br>")
 
@@ -274,9 +284,12 @@ def getPlayerElement(sender, players, thread_url, addInfo=False, addIsoThread=No
     dead_icon = ""
     iso_icon = ""
     info_icon = ""
+    victory_icon = ""
 
-
-    if(players[sender]["flip_post"] != None):
+    if(players[sender]["status"] == "victory"):
+        victory_icon = "<abbr rel=\"tooltip\" title=\"Go to victory post\">"
+        victory_icon = victory_icon+"<a style=\"text-decoration:none\" href='"+  players[sender]["flip_post"] +"' target=\"_blank\">"+"🏆 "+"</a></abbr>"
+    elif(players[sender]["flip_post"] != None):
         dead_icon = "<abbr rel=\"tooltip\" title=\"Go to elimination post\">"
         dead_icon = dead_icon+"<a style=\"text-decoration:none\" href='"+  players[sender]["flip_post"] +"' target=\"_blank\">"+"💀 "+"</a></abbr>"
     if(addIsoThread):
@@ -298,7 +311,7 @@ def getPlayerElement(sender, players, thread_url, addInfo=False, addIsoThread=No
 
     player_code = "<abbr rel=\"tooltip\" title=\""+contents+"\">"+name+"</abbr>"
 
-    return dead_icon+iso_icon+player_code
+    return victory_icon+dead_icon+iso_icon+player_code
 
 def bbCodePrint(days, days_info, days_posts, players, countdown=None):
     days.reverse()
@@ -539,6 +552,9 @@ def htmlTimelinePlayer(playerX, days, players, other_actions):
             continue
         elif(vote['action'] == 'death'):
             response+= prefix+player_code_target+"</b> was eliminated!<br>"
+            continue
+        elif(vote['action'] == 'victory'):
+            response+= prefix+player_code_target+"</b> won the game!<br>"
             continue
         elif(vote['action'] == 'day_start'):
             response+= prefix+"Day "+vote["day_name"]+" begins!</b><br><br>"

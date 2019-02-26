@@ -33,6 +33,7 @@ command_reset = "votes have been reset"
 
 command_players= "!player_list"
 command_death= "((.+) has died)"
+command_victory= "((.+) has won)"
 command_player= "(\[(.+)\] (.+) - (.+))"
 command_replaced= "(\[(.+)\] (.+) - (.+) has replaced (.+))"
 
@@ -405,6 +406,31 @@ def scrapeThread(thread_id, om=False):
                             line = line.lower()
                             if nextPost:
                                 break
+
+                            #Handle victory command
+                            if(bool(re.search(command_victory, line, re.IGNORECASE)) and len(players)>0):
+
+                                m = re.search(command_victory, line, re.IGNORECASE)
+                                winner = m.group(2).partition('>')[2].strip()
+                                winner = winner.strip().lower()
+
+                                if not(winner in players):
+                                    continue
+
+                                players[winner]["status"] = "victory"
+                                players[winner]["flip_post"] = currentLink
+                                if(players[winner]["replaces"] != None):
+                                    second = players[winner]["replaces"]
+                                    players[second]["flip_post"] = currentLink
+                                toAppend = {'sender':None, 'target':winner, 'action':'victory', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
+                                other_actions.append(toAppend)
+
+                                if(current_day != None):
+                                    for player in current_day:
+                                        for vote in current_day[player]:
+                                            if(vote["sender"]==winner.lower()):
+                                                removeActiveVote(winner.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
+                                print(winner)
                             #Handle death command
                             if(bool(re.search(command_death, line, re.IGNORECASE)) and len(players)>0):
 
