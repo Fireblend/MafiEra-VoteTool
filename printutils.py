@@ -343,7 +343,7 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
                         players[vote["sender"]]["voting"] = True
 
             for key in players:
-                if((not players[key]["voting"] )and players[key]["status"]!="replaced" and players[key]["status"]!="dead"):
+                if((not players[key]["voting"] )and players[key]["status"]!="replaced" and players[key]["status"]!="dead" and players[key]["status"]!="victory"):
                     not_voting += players[key]["name"]+", "
                     not_voting_no += 1
             if(not_voting_no > 0):
