@@ -102,7 +102,7 @@ other_actions = []
 message_list_strainer = SoupStrainer(["div", "header"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite", "message-attribution"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
-mo_message_list_strainer = SoupStrainer(["div", "span"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
+mo_message_list_strainer = SoupStrainer(["div", "span", "abbr"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False, isOM=False):
@@ -178,7 +178,7 @@ def getSoupInBackground(sess, resp, isOM):
         posts = era_page.find_all("div", {"class" : "messageContent"})
         users = era_page.find_all("div", {"class" : "messageUserInfo"})
         links = era_page.find_all("div", {"class" : "messageDetails"})
-        timestamps = era_page.find_all("span", {"class" : "DateTime"})
+        timestamps = era_page.find_all("abbr", {"class" : "DateTime"})
 
     #Readies the data for this page in the background
     resp.data = {"posts":posts, "users":users, "links":links, "timestamps":timestamps}
@@ -292,11 +292,10 @@ def scrapeThread(thread_id, om=False):
         if p+lastPage == 1:
             #Try to grab a banner from the first post
             img = posts[0].find("img")
-            if(img != None and img.has_attr('src')):
-                banner_url = img["src"]
-                if '/' == banner_url[-1]:
-                    banner_url[-1] = ' '
-                startPost = 3
+            banner_url = img["src"]
+            if '/' == banner_url[-1]:
+                banner_url[-1] = ' '
+            startPost = 3
 
             #Load player list from second post?
             if(len(players) == 0):
@@ -498,9 +497,11 @@ def scrapeThread(thread_id, om=False):
 
                                 other_actions.append(toAppend)
 
-                                img = posts[i].find("img")
-                                if(img != None and img.has_attr('src')):
-                                    countdown = img["src"]
+                                imgList = posts[i].findAll("img")
+
+                                for img in imgList:
+                                    if(img != None and img.has_attr('src') and ("countdown" in img["src"])):
+                                        countdown = img["src"]
 
                                 break
                             #If the day has ended, append the current day to the days variable and then clear it
@@ -529,9 +530,11 @@ def scrapeThread(thread_id, om=False):
                                     print("No file found, or error loading file: ")
                                     print (e)
 
-                                img = posts[i].find("img")
-                                if(img != None and img.has_attr('src')):
-                                    countdown = img["src"]
+                                imgList = posts[i].findAll("img")
+
+                                for img in imgList:
+                                    if(img != None and img.has_attr('src') and ("countdown" in img["src"])):
+                                        countdown = img["src"]
 
                                 #Set day-related variables to none, since we're not in an active day phase
                                 current_day = None
