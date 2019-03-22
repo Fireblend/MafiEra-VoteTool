@@ -44,8 +44,12 @@ def gamePage(threadId):
     if(len(threadId.split("."))> 1):
         return redirect(vt_url+threadId.split(".")[1]+"/")
 
+
     url = vt_url+threadId+"/"
     res = votecount.scrapeThread(threadId+"/")
+
+    if(len(res["days"])) == 0:
+        return render_template('template_nogame.html')
 
     hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
 
@@ -63,8 +67,6 @@ def gamePage(threadId):
 
     header+="<br><br>"
 
-    if(len(res["days"])) == 0:
-        return render_template('template_nogame.html')
 
     return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, html_seq=hresponseseq, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
@@ -117,6 +119,8 @@ def omGamePage(threadId):
 
     hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
 
+    if(len(res["days"])) == 0:
+        return render_template('template_nogame.html')
     hresponseseq = "No info available for legacy games!"
     if(len(res["players"]) >0):
         hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"], countdown=res["countdown"])
@@ -131,8 +135,6 @@ def omGamePage(threadId):
 
     header+="<br><br>"
 
-    if(len(res["days"])) == 0:
-        return render_template('template_nogame.html')
 
     return render_template('template.html', thread_url=om_thread_url+threadId, html=hresponse, html_seq= hresponseseq, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
