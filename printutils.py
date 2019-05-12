@@ -10,14 +10,30 @@ def getThreadId(url):
 
 # The following 2 functions format the results into HTML
 def htmlPrintDay(day, players):
+    partners = []
     response = ""
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
-        voteList = day[player]
-        activeVotes = countActiveVotes(day[player])
+        if player in partners:
+            continue
+        if("partner" in players[player]):
+            partner = players[player]["partner"]
+            partners.append(partner)
+            if partner in day:
+                voteList = day[player] + day[partner]
+                activeVotes = countActiveVotes(day[player]) + countActiveVotes(day[partner])
+            else:
+                voteList = day[player]
+                activeVotes = countActiveVotes(day[player])
+            player_code = getPlayerElement(player, players, None, False) + " & " +  getPlayerElement(partner, players, None, False)
+
+        else:
+            voteList = day[player]
+            activeVotes = countActiveVotes(day[player])
+            player_code = getPlayerElement(player, players, None, False)
+
         #If the user has no active votes, we mark it with a special div class so we can filter it out later.
         if(activeVotes == 0):
             response += "<div class=\"not_active\">"
-        player_code = getPlayerElement(player, players, None, False)
         response+=("<div class=\"pname\"><br><u><b>"+player_code+ "</b></u></div> ("+str(activeVotes)+" votes)<br>")
         if(activeVotes == 0):
             response += "</div>"
@@ -225,16 +241,41 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
 # The following 2 functions format the results into BBCode
 def bbCodePrintDay(day, players):
     response = ""
+    partners = []
     for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
-        voteList = day[player]
-        activeVotes = countActiveVotes(day[player])
+
+        if player in partners:
+            continue
+
+        print(players[player])
+        if("partner" in players[player]):
+            partner = players[player]["partner"]
+            partners.append(partner)
+            if partner in day:
+                voteList = day[player] + day[partner]
+                activeVotes = countActiveVotes(day[player]) + countActiveVotes(day[partner])
+            else:
+                voteList = day[player]
+                activeVotes = countActiveVotes(day[player])
+            name  = player + " & " + partner
+
+            if len(players) > 0:
+                name = players[player]["name"]+ " & " +  players[partner]["name"]
+
+        else:
+            voteList = day[player]
+            activeVotes = countActiveVotes(day[player])
+            player_code = getPlayerElement(player, players, None, False)
+            name = player
+
+            if len(players) > 0:
+                name = players[player]["name"]
+
         #If the user has no active votes, we mark it with a special div class so we can filter it out later.
         if(activeVotes == 0):
             response += "<div class=\"not_active\">"
 
-        name = player
-        if len(players) > 0:
-            name = players[player]["name"]
+
         response+=("\n[b][u]"+name+ "[/u][/b] ("+str(activeVotes)+" votes)\n")
         if(activeVotes == 0):
             response += "</div>"

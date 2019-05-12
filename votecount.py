@@ -32,9 +32,11 @@ command_day_begins= "(day (.+) begins)"
 command_reset = "votes have been reset"
 
 command_players= "!player_list"
+command_pairs= "!pair_list"
 command_death= "((.+) has died)"
 command_victory= "((.+) has won)"
 command_player= "(\[(.+)\] (.+) - (.+))"
+command_pair= "(.+) and (.+)"
 command_replaced= "(\[(.+)\] (.+) - (.+) has replaced (.+))"
 
 # No active day atm
@@ -81,6 +83,7 @@ days_posts = []
 #       replaces:       If this player is a replacement, who they are replacing
 #       status:         Alive, Dead, Replaced
 #       death_post:     Role flip post number
+#       partner:        Partner for pair games
 
 players = {}
 
@@ -305,6 +308,7 @@ def scrapeThread(thread_id, om=False):
                 action_list = posts[0].find_all(action) + posts[1].find_all(action) + posts[2].find_all(action)
                 print(action_list)
                 pCount = 0
+                cCount = 0
                 for action in action_list:
                     #Check for color tags
                     if (action.has_attr('style') and 'color' in action['style']) or (action.has_attr('class') and 'bbHighlight' in action['class']):
@@ -318,14 +322,21 @@ def scrapeThread(thread_id, om=False):
                             print(line)
                             if command_players in line:
                                 pCount += 1
-                                if pCount > 1:
-                                    break
                             elif (bool(re.search(command_player, line, re.IGNORECASE)) and pCount == 1):
                                 m = re.search(command_player, line, re.IGNORECASE)
                                 pronouns = m.group(2)
                                 player_name = m.group(3)
                                 timezone = m.group(4)
                                 players[player_name.lower()] = {"pronouns":pronouns.strip(), "name":player_name.strip(), "timezone":timezone.strip(), "status": "alive", "flip_post":None, "replaces":None, "replaced_by":None}
+                                print(player_name)
+                            elif command_pairs in line:
+                                cCount += 1
+                            elif (bool(re.search(command_pair, line, re.IGNORECASE)) and cCount == 1):
+                                m = re.search(command_pair, line, re.IGNORECASE)
+                                player_1 = m.group(1)
+                                player_2 = m.group(2)
+                                players[player_1.lower()]["partner"] = player_2.lower()
+                                players[player_2.lower()]["partner"] = player_1.lower()
                                 print(player_name)
                 if(len(players) > 0):
                     try:
@@ -465,6 +476,11 @@ def scrapeThread(thread_id, om=False):
                                 players[newplayer.lower()] = {"pronouns":pronoun, "name":newplayer, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower(), "replaced_by":None}
                                 players[replaced.lower()]["status"] = "replaced"
                                 players[replaced.lower()]["replaced_by"] = newplayer.lower()
+
+                                if("partner" in players[replaced.lower()]):
+                                    players[newplayer.lower()]["partner"] = players[replaced.lower()]["partner"]
+                                    players[players[replaced.lower()]["partner"]]["partner"] = newplayer.lower()
+
                                 toAppend = {'sender':replaced.lower(), 'target':newplayer.lower(), 'action':'replacement', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
                                 other_actions.append(toAppend)
 
