@@ -242,7 +242,7 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
 def bbCodePrintDay(day, players):
     response = ""
     partners = []
-    for player in sorted(day, key=lambda k: countActiveVotes(day[k], players, day), reverse=True):
+    for player in sorted(day, key=lambda k: countActiveVotes(day[k], k, players, day), reverse=True):
 
         if player in partners:
             continue
