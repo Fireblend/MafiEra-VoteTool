@@ -12,7 +12,7 @@ def getThreadId(url):
 def htmlPrintDay(day, players):
     partners = []
     response = ""
-    for player in sorted(day, key=lambda k: countActiveVotes(day[k]), reverse=True):
+    for player in sorted(day, key=lambda k: countActiveVotes(day[k], k, players, day), reverse=True):
         if player in partners:
             continue
         if("partner" in players[player]):
@@ -429,8 +429,14 @@ def totalCountPrint(days_posts, players, thread_url):
     return response
 
 # Counts active votes from a vote list
-def countActiveVotes(votes):
+def countActiveVotes(votes, player=None, players=None, day=None):
     activeVotes = 0
+    if (player != None):
+        if ("partner" in players[player]):
+            partner = players[player]["partner"]
+            if(partner in day):
+                activeVotes = activeVotes+countActiveVotes(day[partner])
+
     for vote in votes:
         if(vote['active']):
             activeVotes = activeVotes+vote['value']
