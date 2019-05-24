@@ -395,7 +395,7 @@ def scrapeThread(thread_id, om=False):
 
 
             #Extract quotes so we don't accidentally count stuff in quotes
-            hasQuote = currentPost.findAll("div", {"class": " bbCodeBlock bbCodeBlock--expandable bbCodeBlock--quote"})
+            hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock-expandContent"})
             if(om):
                 hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock bbCodeQuote"})
             for quote in hasQuote: # Skips quoted posts
