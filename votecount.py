@@ -360,7 +360,6 @@ def scrapeThread(thread_id, om=False):
                 linkBlock = link.findAll("li")
                 link = linkBlock[len(linkBlock)-1]
 
-
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
             currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
@@ -373,6 +372,9 @@ def scrapeThread(thread_id, om=False):
                 currentTimestamp = dateutil.parser.parse(currentTimestamp).strftime("%x %X")
 
             currentPostNum = link.find("a").string;
+
+            currentPostNum = currentPostNum.strip()
+            currentLink = currentLink.strip()
 
             if current_day_posts != None and (currentUser in players or len(players)==0):
                 if currentUser not in current_day_posts:
