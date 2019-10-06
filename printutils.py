@@ -162,7 +162,7 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
     response = ""
 
     for key in players:
-        if("username" in players[key]):
+        if("username" in players[key] or "nokill" in players[key]):
             continue
         players[key]["voting"] = False
         if(players[key]["status"] == "alive"):
@@ -181,7 +181,7 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
                 players[vote["sender"]]["voting"] = True
 
     for key in players:
-        if("username" in players[key]):
+        if("username" in players[key] or "nokill" in players[key]):
             continue
         if(players[key]["voting"]):
             voting += 1
@@ -328,6 +328,9 @@ def getPlayerElement(sender, players, thread_url, addInfo=False, addIsoThread=No
     if(len(players) == 0):
         return sender
 
+    if("nokill" in players[sender]):
+        return "No kill"
+
     name = players[sender]["name"]
     if(players[sender]["nickname"] != None):
         name = name+" / "+players[sender]["nickname"]
@@ -396,7 +399,7 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
                         players[vote["sender"]]["voting"] = True
 
             for key in players:
-                if("username" in players[key]):
+                if("username" in players[key] or "nokill" in players[key]):
                     continue
                 if((not players[key]["voting"] )and players[key]["status"]!="replaced" and players[key]["status"]!="dead" and players[key]["status"]!="victory"):
                     not_voting += players[key]["name"]+", "
