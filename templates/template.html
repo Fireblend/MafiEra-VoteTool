@@ -38,23 +38,6 @@ input {
   margin-left: 15px;
 }
 
-@media (orientation: landscape) {
-  .column1 {
-    float: left;
-    width: 35%;
-    height:100%;
-    margin-left: 15px;
-  }
-}
-
-@media (orientation: portrait) {
-  .column1 {
-    float: left;
-    width: 100%;
-    margin-left: 15px;
-  }
-}
-
 .toggle {
     font-size : 16px;
     border-style: solid;
@@ -113,6 +96,31 @@ input {
     z-index: 100;
     padding: 15px;
 }
+
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 800px) {
+  .column {
+    width: 100%;
+  }
+}
 </style>
 <head>
   <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
@@ -130,21 +138,28 @@ input {
     <a class="togglec" onclick="copyCurrentDay()" href="#">Copy Current Day BBCode</a>
   </div>
 
-    <div id="html_out" style="display:block">
-      {{html|safe}}
-    </div>
+  <div class="row">
+    <div class="column">
+        <div id="html_out" style="display:block">
+          {{html|safe}}
+        </div>
 
-    <div id="bbcode_out" style="display:none">
-      {{bbcode|safe}}
-    </div>
+        <div id="bbcode_out" style="display:none">
+          {{bbcode|safe}}
+        </div>
 
-    <div id="html_seq" style="display:none">
-      {{html_seq|safe}}
+        <div id="html_seq" style="display:none">
+          {{html_seq|safe}}
+        </div>
     </div>
+    <div class="column">
+        <div id="posts_total">
+          {{totals|safe}}
+        </div>
+    </div>
+  </div>
 
-    <div id="posts_total">
-      {{totals|safe}}
-    </div>
+
     <br><br>
     <br><br>
     <br><br>
