@@ -26,6 +26,9 @@ input {
 #buttons {
   text-align: center;
 }
+#countdown {
+  width: 240px;
+}
 #info {
   text-align: center;
   width: auto;
@@ -34,6 +37,7 @@ input {
 #content {
   margin-left: 15px;
 }
+
 .toggle {
     font-size : 16px;
     border-style: solid;
@@ -46,6 +50,9 @@ input {
     text-decoration: none;
     border-color: #383838;
     border-radius: 25px;
+}
+.old_days {
+    display:none;
 }
 .togglec {
     font-size : 16px;
@@ -61,7 +68,7 @@ input {
     border-radius: 25px;
 }
 .day {
-  white-space:pre-wrap;
+    white-space:pre-wrap;
 }
 .votes {
   margin-left:8px;
@@ -77,6 +84,43 @@ input {
   font-size: 19px;
   display: inline;
 }
+.name {
+  color: #2d2d2d;
+}
+#tooltip
+{
+    text-align: center;
+    color: #fff;
+    background: #111;
+    position: absolute;
+    z-index: 100;
+    padding: 15px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 800px) {
+  .column {
+    width: 100%;
+  }
+}
 </style>
 <head>
   <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
@@ -89,35 +133,68 @@ input {
   </div>
 
   <div id="buttons">
-    <a class="toggle" onclick="toggleFormat()" href="#">Toggle HTML/BBCode</a>
-    <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active Votes</a><br><br>
-    <a class="togglec" onclick="copyCurrentDay()" href="#">Copy Current Day's BBCode</a>
+    <a class="toggle" onclick="toggleFormat()" href="#">Toggle View</a>
+    <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active</a><br><br>
+    <a class="togglec" onclick="copyCurrentDay()" href="#">Copy Current Day BBCode</a>
   </div>
 
-    <div id="html_out">
-      {{html|safe}}
-    </div>
+  <div class="row">
+    <div class="column">
+        <div id="html_out" style="display:block">
+          {{html|safe}}
+        </div>
 
-    <div id="bbcode_out" style="display:none">
-      {{bbcode|safe}}
-    </div>
+        <div id="bbcode_out" style="display:none">
+          {{bbcode|safe}}
+        </div>
 
-    <div id="posts_total">
-      {{totals|safe}}
+        <div id="html_seq" style="display:none">
+          {{html_seq|safe}}
+        </div>
     </div>
+    <div class="column">
+        <div id="posts_total">
+          {{totals|safe}}
+        </div>
+    </div>
+  </div>
+
+
+    <br><br>
+    <br><br>
+    <br><br>
   </div>
 
   <script>
   function toggleFormat() {
     var html = document.getElementById("html_out");
     var bbcode = document.getElementById("bbcode_out");
-    if (html.style.display === "none") {
+    var html_seq = document.getElementById("html_seq");
+    if (html.style.display === "block") {
+      html.style.display = "none";
+      bbcode.style.display = "none";
+      html_seq.style.display = "block";
+    } else if (html_seq.style.display === "block") {
+      bbcode.style.display = "block";
+      html.style.display = "none";
+      html_seq.style.display = "none";
+    } else {
       html.style.display = "block";
       bbcode.style.display = "none";
-    } else {
-      html.style.display = "none";
-      bbcode.style.display = "block";
+      html_seq.style.display = "none";
     }
+  }
+
+  function toggleDays() {
+    var elements = document.getElementsByClassName("old_days");
+    var newVal = "block";
+    if (elements[0].style.display === "block") {
+      newVal = "none";
+    }
+    for(var i=0; i<elements.length; i++) {
+      elements[i].style.display = newVal
+    }
+    return false;
   }
 
   function toggleNAVotes() {
@@ -187,4 +264,84 @@ input {
       }
   }
   </script>
+
+    <script type="text/javascript" src="https://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js"></script>
+    <script>
+    $( function()
+  {
+      var targets = $( '[rel~=tooltip]' ),
+          target  = false,
+          tooltip = false,
+          title   = false;
+
+      targets.bind( 'mouseenter', function()
+      {
+          target  = $( this );
+          tip     = target.attr( 'title' );
+          tooltip = $( '<div id="tooltip"></div>' );
+
+          if( !tip || tip == '' )
+              return false;
+
+          target.removeAttr( 'title' );
+          tooltip.css( 'opacity', 0 )
+                 .html( tip )
+                 .appendTo( 'body' );
+
+          var init_tooltip = function()
+          {
+              if( $( window ).width() < tooltip.outerWidth() * 1.5 )
+                  tooltip.css( 'max-width', $( window ).width() / 2 );
+              else
+                  tooltip.css( 'max-width', 340 );
+
+              var pos_left = target.offset().left + 150,
+                  pos_top  = target.offset().top - tooltip.outerHeight() /2;
+
+              if( pos_left < 0 )
+              {
+                  pos_left = target.offset().left + target.outerWidth() / 2 - 20;
+                  tooltip.addClass( 'left' );
+              }
+              else
+                  tooltip.removeClass( 'left' );
+
+              if( pos_left + tooltip.outerWidth() > $( window ).width() )
+              {
+                  pos_left = target.offset().left - tooltip.outerWidth() + target.outerWidth() / 2 + 20;
+                  tooltip.addClass( 'right' );
+              }
+              else
+                  tooltip.removeClass( 'right' );
+
+              if( pos_top < 0 )
+              {
+                  var pos_top  = target.offset().top + target.outerHeight();
+                  tooltip.addClass( 'top' );
+              }
+              else
+                  tooltip.removeClass( 'top' );
+
+              tooltip.css( { left: pos_left, top: pos_top } )
+                     .animate( { top: '+=10', opacity: 1 }, 50 );
+          };
+
+          init_tooltip();
+          $( window ).resize( init_tooltip );
+
+          var remove_tooltip = function()
+          {
+              tooltip.animate( { top: '-=10', opacity: 0 }, 50, function()
+              {
+                  $( this ).remove();
+              });
+
+              target.attr( 'title', tip );
+          };
+
+          target.bind( 'mouseleave', remove_tooltip );
+          tooltip.bind( 'click', remove_tooltip );
+      });
+  });
+    </script>
 </body>

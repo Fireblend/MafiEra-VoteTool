@@ -1,6 +1,7 @@
 import re
 import json
 import urllib.request
+import dateutil.parser
 from datetime import datetime
 from requests_futures.sessions import FuturesSession
 
@@ -29,6 +30,14 @@ command_unvote= "unvote"
 command_day_ends= "(day (.+) ends)"
 command_day_begins= "(day (.+) begins)"
 command_reset = "votes have been reset"
+
+command_players= "!player_list"
+command_pairs= "!pair_list"
+command_death= "((.+) has died)"
+command_victory= "((.+) has won)"
+command_player= "(\[(.+)\] (.+) - (.+))"
+command_pair= "(.+) and (.+)"
+command_replaced= "(\[(.+)\] (.+) - (.+) has replaced (.+))"
 
 # No active day atm
 current_day = None
@@ -67,15 +76,36 @@ days_info = []
 
 days_posts = []
 
+# players
+# General player info dictionary
+#       pronouns:       Preferred player pronouns
+#       timezone:       Timezone
+#       replaces:       If this player is a replacement, who they are replacing
+#       status:         Alive, Dead, Replaced
+#       death_post:     Role flip post number
+#       partner:        Partner for pair games
+
+players = {}
+
+# other_actions
+# A list of other actions (dictionaries) to be shown in a timeline
+#       sender
+#       target
+#       action
+#       phase
+#       timestamp
+
+other_actions = []
+
 ############################################
 ####     SOME USEFUL FUNCTIONS
 ############################################
 
 #This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
-message_list_strainer = SoupStrainer("div", {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite"]})
+message_list_strainer = SoupStrainer(["div", "ul"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite message-attribution-opposite--list", "message-attribution-main"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
-mo_message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "messageDetails"]})
+mo_message_list_strainer = SoupStrainer(["div", "span", "abbr"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False, isOM=False):
@@ -109,7 +139,7 @@ def getSoupFromText(f, isMessage=False, isOM=False):
     return result
 
 # Marks a vote as innactive
-def removeActiveVote(user, day, link, post_num):
+def removeActiveVote(user, day, link, post_num, timestamp, store=False, other_actions=None, day_num=None):
     for player in day:
         for vote in day[player]:
             #There should only be one active vote per player at a time
@@ -119,10 +149,14 @@ def removeActiveVote(user, day, link, post_num):
                 vote['active'] = False
                 vote['unvote_link'] = link
                 vote['unvote_num'] = post_num
+                vote['unvote_timestamp'] = timestamp
+                if(store):
+                    toAppend = {'sender':user, 'target':player, 'action':'unvote', 'post_num':post_num, 'post_link':link, 'timestamp':timestamp, 'phase':day_num}
+                    other_actions.append(toAppend)
 
 # Adds a new vote
-def addActiveVote(user, target, day, link, post_num, value=1):
-    toAppend = {'sender': user, 'active': True, 'vote_link': link, 'unvote_link':None, 'vote_num': post_num, 'unvote_num':None, 'value':value }
+def addActiveVote(user, target, day, link, post_num, timestamp, value=1):
+    toAppend = {'action':'vote', 'target': target, 'sender': user, 'active': True, 'post_link': link, 'unvote_link':None, 'post_num': post_num, 'unvote_num':None, 'value':value, 'timestamp':timestamp, 'unvote_timestamp':None }
     if target in day:
         day[target].append(toAppend)
     else:
@@ -138,16 +172,19 @@ def getSoupInBackground(sess, resp, isOM):
     #These are the users
     users = era_page.find_all("div", {"class" : "message-userDetails"})
     #These are the links
-    links = era_page.find_all("div", {"class" : "message-attribution-opposite"})
+    links = era_page.find_all("ul", {"class" : "message-attribution-opposite message-attribution-opposite--list"})
+    #These are the timestamps
+    timestamps = era_page.find_all("div", {"class" : "message-attribution-main"})
 
     #We use an alternative div name for OM since it's different there.
     if(isOM):
         posts = era_page.find_all("div", {"class" : "messageContent"})
         users = era_page.find_all("div", {"class" : "messageUserInfo"})
         links = era_page.find_all("div", {"class" : "messageDetails"})
+        timestamps = era_page.find_all("time", {"class" : "u-dt"})
 
     #Readies the data for this page in the background
-    resp.data = {"posts":posts, "users":users, "links":links}
+    resp.data = {"posts":posts, "users":users, "links":links, "timestamps":timestamps}
 
 ############################################
 ####     MAIN SCRAPING FUNCTION
@@ -184,7 +221,9 @@ def scrapeThread(thread_id, om=False):
     days = []
     days_info = []
     days_posts = []
-
+    players = {}
+    other_actions = []
+    countdown = None
     #Banner
     banner_url = None
 
@@ -204,9 +243,13 @@ def scrapeThread(thread_id, om=False):
         days_info = data["days_info"]
         days_posts = data["days_posts"]
         banner_url = data["banner_url"]
+        players = data["players"]
+        other_actions = data["other_actions"]
+
         #We find out the last day end page and post numbers, so we can start scraping from that point.
-        lastPage = days_info[len(days_info)-1]['page_end']
-        lastPost = days_info[len(days_info)-1]['day_end_n']
+        if(len(days_info) > 0):
+            lastPage = days_info[len(days_info)-1]['page_end']
+            lastPost = days_info[len(days_info)-1]['day_end_n']
 
         file.close()
     except Exception as e:
@@ -235,11 +278,15 @@ def scrapeThread(thread_id, om=False):
         users = pageData["users"]
         #These are the links
         links = pageData["links"]
+        #These are the timestamps
+        timestamps = pageData["timestamps"]
 
         if(not om):
             i = 0
             while(i != len(links)):
-                lstr = links[i].find("a")['href'].partition("/permalink")[0]
+                linkBlock = links[i].findAll("li")
+                link = linkBlock[len(linkBlock)-1]
+                lstr = link.find("a")['href'].partition("/permalink")[0]
                 if("#" in lstr or "threadmarks" in lstr):
                     links.pop(i)
                     i = i - 1
@@ -250,27 +297,86 @@ def scrapeThread(thread_id, om=False):
         if p+lastPage == 1:
             #Try to grab a banner from the first post
             img = posts[0].find("img")
-            if(img != None and img.has_attr('src')):
-                banner_url = img["src"]
-                if '/' == banner_url[-1]:
-                    banner_url[-1] = ' '
-                startPost = 3
+            banner_url = img["src"]
+            if '/' == banner_url[-1]:
+                banner_url[-1] = ' '
+            startPost = 3
 
-        print(banner_url)
+            #Load player list from second post?
+            if(len(players) == 0):
+                action = "span"
+                if(om):
+                    action = "strong"
+                action_list = posts[0].find_all(action) + posts[1].find_all(action) + posts[2].find_all(action)
+                print(action_list)
+                pCount = 0
+                cCount = 0
+                for action in action_list:
+                    #Check for color tags
+                    if (action.has_attr('style') and 'color' in action['style']) or (action.has_attr('class') and 'bbHighlight' in action['class']):
+                        #I'm removing bold tags here to simplify the command matching procedure
+                        for e in action.findAll('br'):
+                            e.extract()
+                        for match in action.findAll('b'):
+                            match.replaceWithChildren()
+                        #Check for valid commands
+                        for line in str(action).splitlines():
+                            print(line)
+                            if command_players in line:
+                                pCount += 1
+                            elif (bool(re.search(command_player, line, re.IGNORECASE)) and pCount == 1):
+                                m = re.search(command_player, line, re.IGNORECASE)
+                                pronouns = m.group(2)
+                                player_name = m.group(3)
+                                timezone = m.group(4)
+                                players[player_name.lower()] = {"pronouns":pronouns.strip(), "name":player_name.strip(), "timezone":timezone.strip(), "status": "alive", "flip_post":None, "replaces":None, "replaced_by":None}
+                                print(player_name)
+                            elif command_pairs in line:
+                                cCount += 1
+                            elif (bool(re.search(command_pair, line, re.IGNORECASE)) and cCount == 1):
+                                m = re.search(command_pair, line, re.IGNORECASE)
+                                player_1 = m.group(1)
+                                player_2 = m.group(2)
+                                players[player_1.lower()]["partner"] = player_2.lower()
+                                players[player_2.lower()]["partner"] = player_1.lower()
+                                print(player_name)
+                if(len(players) > 0):
+                    try:
+                        file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
+                        text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players})
+                        file.write(text)
+                        file.close()
+                    except Exception as e:
+                        print("No file found, or error loading file: ")
+                        print (e)
+
 
         #For each post in this page:
         for i in range(startPost, len(posts)):
             nextPost = False
             #Get the current post's content, the user, the link and the post number
+            link = links[i]
+            if(not om):
+                linkBlock = link.findAll("li")
+                link = linkBlock[len(linkBlock)-1]
+
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
-            currentLink = era_url+links[i].find("a")['href'].partition("/permalink")[0];
+            currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
+            currentTimestamp = ""
             if (om):
-                currentLink = om_url+links[i].find("a")['data-href'].partition("/permalink")[0];
-            currentPostNum = links[i].find("a").string;
+                currentLink = om_url+link.find("a")['data-href'].partition("/permalink")[0];
+                currentTimestamp = timestamps[i].get_text(strip=True)
+            else:
+                currentTimestamp = timestamps[i].find("time")['datetime']
+                currentTimestamp = dateutil.parser.parse(currentTimestamp).strftime("%x %X")
 
+            currentPostNum = link.find("a").string;
 
-            if current_day_posts != None:
+            currentPostNum = currentPostNum.strip()
+            currentLink = currentLink.strip()
+
+            if current_day_posts != None and (currentUser in players or len(players)==0):
                 if currentUser not in current_day_posts:
                     current_day_posts[currentUser] = 1
                 else:
@@ -289,8 +395,9 @@ def scrapeThread(thread_id, om=False):
                 else:
                     lastPost = None
 
+
             #Extract quotes so we don't accidentally count stuff in quotes
-            hasQuote = currentPost.findAll("div", {"class": " bbCodeBlock bbCodeBlock--expandable bbCodeBlock--quote"})
+            hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock-expandContent"})
             if(om):
                 hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock bbCodeQuote"})
             for quote in hasQuote: # Skips quoted posts
@@ -302,6 +409,9 @@ def scrapeThread(thread_id, om=False):
                 action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
                 for action in action_list:
+                    print(action)
+                    for e in action.findAll('strong'):
+                        e.extract()
                     if nextPost:
                         break
                     #Check for color tags
@@ -310,9 +420,85 @@ def scrapeThread(thread_id, om=False):
                         for match in action.findAll('b'):
                             match.replaceWithChildren()
                         #Check for valid commands
-                        for line in str(action).lower().splitlines():
+                        for line in str(action).splitlines():
+                            origLine = line
+                            line = line.lower()
                             if nextPost:
                                 break
+
+                            #Handle victory command
+                            if(bool(re.search(command_victory, line, re.IGNORECASE)) and len(players)>0):
+
+                                m = re.search(command_victory, line, re.IGNORECASE)
+                                winner = m.group(2).partition('>')[2].strip()
+                                winner = winner.strip().lower()
+
+                                if not(winner in players):
+                                    continue
+
+                                players[winner]["status"] = "victory"
+                                players[winner]["flip_post"] = currentLink
+                                if(players[winner]["replaces"] != None):
+                                    second = players[winner]["replaces"]
+                                    players[second]["flip_post"] = currentLink
+                                toAppend = {'sender':None, 'target':winner, 'action':'victory', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
+                                other_actions.append(toAppend)
+
+                                if(current_day != None):
+                                    for player in current_day:
+                                        for vote in current_day[player]:
+                                            if(vote["sender"]==winner.lower()):
+                                                removeActiveVote(winner.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
+                                print(winner)
+                            #Handle death command
+                            if(bool(re.search(command_death, line, re.IGNORECASE)) and len(players)>0):
+
+                                m = re.search(command_death, line, re.IGNORECASE)
+                                dead = m.group(2).partition('>')[2].strip()
+                                dead = dead.strip().lower()
+
+                                if not(dead in players):
+                                    continue
+
+                                players[dead]["status"] = "dead"
+                                players[dead]["flip_post"] = currentLink
+                                if(players[dead]["replaces"] != None):
+                                    second = players[dead]["replaces"]
+                                    players[second]["flip_post"] = currentLink
+                                toAppend = {'sender':None, 'target':dead, 'action':'death', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
+                                other_actions.append(toAppend)
+
+                                if(current_day != None):
+                                    for player in current_day:
+                                        for vote in current_day[player]:
+                                            if(vote["sender"]==dead.lower()):
+                                                removeActiveVote(dead.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
+
+                            #Handle replacement command
+                            if(bool(re.search(command_replaced, line, re.IGNORECASE)) and len(players)>0):
+                                m = re.search(command_replaced, origLine, re.IGNORECASE)
+                                pronoun = m.group(2)
+                                newplayer = m.group(3)
+                                timezone = m.group(4)
+                                replaced = m.group(5).partition('<')[0].strip()
+
+                                players[newplayer.lower()] = {"pronouns":pronoun, "name":newplayer, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower(), "replaced_by":None}
+                                players[replaced.lower()]["status"] = "replaced"
+                                players[replaced.lower()]["replaced_by"] = newplayer.lower()
+
+                                if("partner" in players[replaced.lower()]):
+                                    players[newplayer.lower()]["partner"] = players[replaced.lower()]["partner"]
+                                    players[players[replaced.lower()]["partner"]]["partner"] = newplayer.lower()
+
+                                toAppend = {'sender':replaced.lower(), 'target':newplayer.lower(), 'action':'replacement', 'post_num':currentPostNum, 'post_link':currentLink, 'timestamp':currentTimestamp, 'phase':len(days)}
+                                other_actions.append(toAppend)
+
+                                if(current_day != None):
+                                    for player in current_day:
+                                        for vote in current_day[player]:
+                                            if(vote["sender"]==replaced.lower()):
+                                                removeActiveVote(replaced.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
+
                             #If the day is starting, set the current day variable to a new day
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
@@ -326,14 +512,26 @@ def scrapeThread(thread_id, om=False):
 
                                 #Initialize new variables for the new day.
                                 current_day_posts = {}
+
+
                                 current_day_info = {"day_name":current_day_name, "day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
                                 nextPost = True
+
+                                toAppend = {'sender':None, 'target':None, 'action':'day_start', 'post_num':currentPostNum, 'post_link':currentLink, 'day_name':current_day_name, 'timestamp':currentTimestamp, 'phase':len(days)}
+
+                                other_actions.append(toAppend)
+
+                                imgList = posts[i].findAll("img")
+
+                                for img in imgList:
+                                    if(img != None and img.has_attr('src') and ("countdown" in img["src"])):
+                                        countdown = img["src"]
+
                                 break
                             #If the day has ended, append the current day to the days variable and then clear it
                             if(bool(re.search(command_day_ends, line, re.IGNORECASE))):
-                                if current_day == None:
-                                    continue
+
                                 print("Day ends on "+currentPostNum+"("+currentLink+")")
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
@@ -344,15 +542,24 @@ def scrapeThread(thread_id, om=False):
                                 days_info.append(current_day_info)
                                 days_posts.append(current_day_posts)
 
+                                toAppend = {'sender':None, 'target':None, 'action':'day_end', 'post_num':currentPostNum, 'post_link':currentLink, 'day_name':current_day_name, 'timestamp':currentTimestamp, 'phase':len(days)}
+                                other_actions.append(toAppend)
+
                                 #Update this game's file with day info
                                 try:
                                     file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
-                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url})
+                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions})
                                     file.write(text)
                                     file.close()
                                 except Exception as e:
                                     print("No file found, or error loading file: ")
                                     print (e)
+
+                                imgList = posts[i].findAll("img")
+
+                                for img in imgList:
+                                    if(img != None and img.has_attr('src') and ("countdown" in img["src"])):
+                                        countdown = img["src"]
 
                                 #Set day-related variables to none, since we're not in an active day phase
                                 current_day = None
@@ -361,6 +568,7 @@ def scrapeThread(thread_id, om=False):
                                 current_day_name = None
                                 nextPost = True
                                 break
+
                             #Handle vote reset command
                             elif(command_reset in line):
                                 if current_day == None:
@@ -371,38 +579,48 @@ def scrapeThread(thread_id, om=False):
                                 break
                             #Handle unvote command
                             elif(command_unvote in line):
-                                if current_day == None:
+                                if current_day == None or (not currentUser in players and len(players) > 1):
                                     continue
                                 print(currentUser+" UNVOTED"+ " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
+                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp,store=True, other_actions=other_actions, day_num=len(days))
                             #Handle vote command
                             elif(command_vote in line):
-                                if current_day == None:
+                                if current_day == None or (not currentUser in players and len(players) > 1):
                                     continue
                                 target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
+                                if not target in players and len(players) > 0:
+                                    continue
                                 print(currentUser+" VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
-                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum)
+
+                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
+                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp)
                             #Handle doublevote command
                             elif(command_doublevote in line):
-                                if current_day == None:
+                                if current_day == None or (not currentUser in players and len(players) > 1):
                                     continue
                                 target = str(line).lower().partition(command_doublevote)[2].partition('<')[0].strip()
+                                if not target in players and len(players) > 0:
+                                    continue
                                 print(currentUser+" DOUBLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
-                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, 2)
+
+                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
+                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp, 2)
                             #Handle triple vote command
                             elif(command_triplevote in line):
-                                if current_day == None:
+                                if current_day == None or (not currentUser in players and len(players) > 1):
                                     continue
                                 target = str(line).lower().partition(command_triplevote)[2].partition('<')[0].strip()
+
+                                if not target in players and len(players) > 0:
+                                    continue
+
                                 print(currentUser+" TRIPLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
-                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum)
-                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, 3)
+
+                                removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
+                                addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp, 3)
 
     if(current_day != None):
         days.append(current_day)
         days_info.append(current_day_info)
         days_posts.append(current_day_posts)
-
-    return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url}
+    return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions, "countdown":countdown}

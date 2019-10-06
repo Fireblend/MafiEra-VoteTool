@@ -33,15 +33,15 @@ body {
 }
 </style>
 <div id="info">
-  <br><b>MafiEra Vote Tool 3000</b><br>
+  <br><b>MafiEra Vote Tool</b><br>
 </div>
 <div id="content">
   <div class="comheader"><br><b>Usage</b></div>: Append the thread ID of the mafia game that needs to be scraped to the end of this page's URL.<br>
   Note that this tool scrapes the entire thread, and it may take a while to finish loading.<br>
 
   <div class="comheader"><br><b>Examples:</b></div><br><br>
-  <div class="moremargin"><a href=http://vote.fireblend.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712>http://vote.fireblend.com/berserk-mafia-ot-ceremony-of-the-eclipse.3712</a><br>
-    <a href=http://vote.fireblend.com/buck-bumble-mafia-lets-rock.22251>http://vote.fireblend.com/buck-bumble-mafia-lets-rock.22251</a><br></div>
+  <div class="moremargin"><a href=http://vote.fireblend.com/98776>http://vote.fireblend.com/98776</a><br>
+    <a href=http://vote.fireblend.com/98803>http://vote.fireblend.com/98803</a><br></div>
 
     <div class="comheader"><br><b>Gamerunner Guide</b><br><br></div>
     This tool works by scraping the ResetEra thread specified through the ID provided in the URL, and sequentially parsing each post, looking for specific <b>commands</b>.<br>
@@ -52,11 +52,16 @@ body {
     <div id="content-guide">
       <div class="comheader">Player commands:</div><br>
       <div class="moremargin">- <B>VOTE: X</B>: Where X is any string. It can only be used during an active day phase (after a <b>DAY BEGINS</b> post and before a <b>DAY ENDS</b> one).<br>
-        - <B>UNVOTE: X</B>: Same restrictions as above. It removes the last active vote from the user. It's not necessary to use this command before every new <b>VOTE</b>.<br><br></div>
-
+        - <B>UNVOTE: X</B>: Same restrictions as above. It removes the last active vote from the user. It's not necessary to use this command before every new <b>VOTE</b>.<br>
+        - <B>MOVE: X</B>: If the game features a concurrent vote mechanic, this can be used to hold a secondary move. See results at http://vote.fireblend.com/tracker/X where X is the thread ID.<br><br></div>
         <div class="comheader">Gamerunner Commands:<br></div>
-        <div class="moremargin">- <B>DAY X BEGINS</B>: Where X is any string. It can be a number, or a written word. Signals the beginning of a day phase.<br>
-          - <B>DAY X ENDS</B>: Where X is any string. It can be a number, or a written word. Signals the end of a day phase.<br></div>
+        <div class="moremargin">
+          - <B>!player_list</B>: This command is used to declare the player list before the game begins. Start a block containing <b>player declaration strings</b> with this command, and end it with the same command.<br>
+          - <B>[P] X - TZ</b>: Player declaration string, where P is a set of preferred pronouns, X the player name, and TZ their timezone.
+          - <B>Day X begins</B>: Where X is any string. It can be a number, or a written word. Signals the beginning of a day phase.<br>
+          - <B>Day X ends</B>: Where X is any string. It can be a number, or a written word. Signals the end of a day phase.<br>
+          - <B>X has died!</B>: Where X is any valid player.<br>
+          - <B>[P] X - TZ has replaced Y</B>: Where [P] X - TZ is a player declaration string, and Y a current valid player.<br></div>
         </div>
 
         <br>This tool brought to you by <b>Fireblend</b> :)<br>
