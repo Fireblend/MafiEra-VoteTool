@@ -117,7 +117,6 @@ def omGamePage(threadId):
     url = vt_url+"om/"+threadId+"/"
     res = votecount.scrapeThread(threadId+"/", True)
 
-    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
 
     if(len(res["days"])) == 0:
         return render_template('template_nogame.html')
@@ -125,6 +124,7 @@ def omGamePage(threadId):
     if(len(res["players"]) >0):
         hresponseseq = printutils.htmlPrintSeq(res["days"], res["days_info"], res["days_posts"], res["players"], url, res["other_actions"], countdown=res["countdown"])
 
+    hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"], countdown=res["countdown"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
 

@@ -36,6 +36,7 @@ command_pairs= "!pair_list"
 command_death= "((.+) has died)"
 command_victory= "((.+) has won)"
 command_player= "(\[(.+)\] (.+) - (.+))"
+command_player_nick= "((.+)\|(.+))"
 command_pair= "(.+) and (.+)"
 command_replaced= "(\[(.+)\] (.+) - (.+) has replaced (.+))"
 
@@ -181,7 +182,7 @@ def getSoupInBackground(sess, resp, isOM):
         posts = era_page.find_all("div", {"class" : "messageContent"})
         users = era_page.find_all("div", {"class" : "messageUserInfo"})
         links = era_page.find_all("div", {"class" : "messageDetails"})
-        timestamps = era_page.find_all("time", {"class" : "u-dt"})
+        timestamps = era_page.find_all("abbr", {"class" : "DateTime"})
 
     #Readies the data for this page in the background
     resp.data = {"posts":posts, "users":users, "links":links, "timestamps":timestamps}
@@ -302,7 +303,6 @@ def scrapeThread(thread_id, om=False):
                 banner_url[-1] = ' '
             startPost = 3
 
-            #Load player list from second post?
             if(len(players) == 0):
                 action = "span"
                 if(om):
@@ -321,7 +321,6 @@ def scrapeThread(thread_id, om=False):
                             match.replaceWithChildren()
                         #Check for valid commands
                         for line in str(action).splitlines():
-                            print(line)
                             if command_players in line:
                                 pCount += 1
                             elif (bool(re.search(command_player, line, re.IGNORECASE)) and pCount == 1):
@@ -329,8 +328,14 @@ def scrapeThread(thread_id, om=False):
                                 pronouns = m.group(2)
                                 player_name = m.group(3)
                                 timezone = m.group(4)
-                                players[player_name.lower()] = {"pronouns":pronouns.strip(), "name":player_name.strip(), "timezone":timezone.strip(), "status": "alive", "flip_post":None, "replaces":None, "replaced_by":None}
-                                print(player_name)
+                                nickname = None
+                                if(bool(re.search(command_player_nick, player_name, re.IGNORECASE))):
+                                    n = re.search(command_player_nick, player_name, re.IGNORECASE)
+                                    player_name = n.group(2)
+                                    nickname = n.group(3)
+                                players[player_name.lower()] = {"pronouns":pronouns.strip(), "name":player_name.strip(), "nickname":nickname, "timezone":timezone.strip(), "status": "alive", "flip_post":None, "replaces":None, "replaced_by":None}
+                                if(nickname != None):
+                                    players[nickname.lower()] = {"username":player_name.lower()}
                             elif command_pairs in line:
                                 cCount += 1
                             elif (bool(re.search(command_pair, line, re.IGNORECASE)) and cCount == 1):
@@ -339,7 +344,6 @@ def scrapeThread(thread_id, om=False):
                                 player_2 = m.group(2)
                                 players[player_1.lower()]["partner"] = player_2.lower()
                                 players[player_2.lower()]["partner"] = player_1.lower()
-                                print(player_name)
                 if(len(players) > 0):
                     try:
                         file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
@@ -435,6 +439,8 @@ def scrapeThread(thread_id, om=False):
 
                                 if not(winner in players):
                                     continue
+                                if ("username" in players[winner]):
+                                    winner = players[winner]["username"]
 
                                 players[winner]["status"] = "victory"
                                 players[winner]["flip_post"] = currentLink
@@ -459,6 +465,8 @@ def scrapeThread(thread_id, om=False):
 
                                 if not(dead in players):
                                     continue
+                                if ("username" in players[dead]):
+                                    dead = players[dead]["username"]
 
                                 players[dead]["status"] = "dead"
                                 players[dead]["flip_post"] = currentLink
@@ -481,10 +489,21 @@ def scrapeThread(thread_id, om=False):
                                 newplayer = m.group(3)
                                 timezone = m.group(4)
                                 replaced = m.group(5).partition('<')[0].strip()
+                                nickname = None
+                                if(bool(re.search(command_player_nick, newplayer, re.IGNORECASE))):
+                                    n = re.search(command_player_nick, newplayer, re.IGNORECASE)
+                                    newplayer = n.group(2)
+                                    nickname = n.group(3)
 
-                                players[newplayer.lower()] = {"pronouns":pronoun, "name":newplayer, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower(), "replaced_by":None}
+                                if ("username" in players[replaced]):
+                                    replaced = players[replaced]["username"]
+
+                                players[newplayer.lower()] = {"pronouns":pronoun, "name":newplayer, "nickname":nickname, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower(), "replaced_by":None}
                                 players[replaced.lower()]["status"] = "replaced"
                                 players[replaced.lower()]["replaced_by"] = newplayer.lower()
+
+                                if(nickname != None):
+                                    players[nickname.lower()]={"username":newplayer.lower()}
 
                                 if("partner" in players[replaced.lower()]):
                                     players[newplayer.lower()]["partner"] = players[replaced.lower()]["partner"]
@@ -590,6 +609,9 @@ def scrapeThread(thread_id, om=False):
                                 target = str(line).lower().partition(command_vote)[2].partition('<')[0].strip()
                                 if not target in players and len(players) > 0:
                                     continue
+                                if ("username" in players[target]):
+                                    target = players[target]["username"]
+
                                 print(currentUser+" VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
 
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
@@ -601,6 +623,8 @@ def scrapeThread(thread_id, om=False):
                                 target = str(line).lower().partition(command_doublevote)[2].partition('<')[0].strip()
                                 if not target in players and len(players) > 0:
                                     continue
+                                if ("username" in players[target]):
+                                    target = players[target]["username"]
                                 print(currentUser+" DOUBLE-VOTED FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
 
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
@@ -609,6 +633,8 @@ def scrapeThread(thread_id, om=False):
                             elif(command_triplevote in line):
                                 if current_day == None or (not currentUser in players and len(players) > 1):
                                     continue
+                                if ("username" in players[target]):
+                                    target = players[target]["username"]
                                 target = str(line).lower().partition(command_triplevote)[2].partition('<')[0].strip()
 
                                 if not target in players and len(players) > 0:
