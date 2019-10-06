@@ -13,6 +13,8 @@ def htmlPrintDay(day, players):
     partners = []
     response = ""
     for player in sorted(day, key=lambda k: countActiveVotes(day[k], k, players, day), reverse=True):
+        if("username" in players[player]):
+            continue
         if player in partners:
             continue
         if("partner" in players[player]):
@@ -160,6 +162,8 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
     response = ""
 
     for key in players:
+        if("username" in players[key]):
+            continue
         players[key]["voting"] = False
         if(players[key]["status"] == "alive"):
             alive += 1
@@ -177,6 +181,8 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
                 players[vote["sender"]]["voting"] = True
 
     for key in players:
+        if("username" in players[key]):
+            continue
         if(players[key]["voting"]):
             voting += 1
             voting_text += players[key]["name"]+"<br>"
@@ -243,7 +249,8 @@ def bbCodePrintDay(day, players):
     response = ""
     partners = []
     for player in sorted(day, key=lambda k: countActiveVotes(day[k], k, players, day), reverse=True):
-
+        if("username" in players[player]):
+            continue
         if player in partners:
             continue
 
@@ -322,6 +329,8 @@ def getPlayerElement(sender, players, thread_url, addInfo=False, addIsoThread=No
         return sender
 
     name = players[sender]["name"]
+    if(players[sender]["nickname"] != None):
+        name = name+" / "+players[sender]["nickname"]
     dead_icon = ""
     iso_icon = ""
     info_icon = ""
@@ -340,8 +349,11 @@ def getPlayerElement(sender, players, thread_url, addInfo=False, addIsoThread=No
 
     contents = "<b>"+players[sender]["name"]+"</b> "
     contents += "<br><b>Pronouns:</b> "+players[sender]["pronouns"]
+    if(players[sender]["nickname"] != None):
+        contents += "<br><b>Nickname:</b> "+players[sender]["nickname"]
     contents += "<br><b>Timezone:</b> "+players[sender]["timezone"]
     contents += "<br><b>Status:</b> "+players[sender]["status"]
+
     if(players[sender]["replaces"] != None):
         contents += "<br><b>Replacing:</b> "+players[players[sender]["replaces"]]["name"]
     if(players[sender]["replaced_by"] != None):
@@ -384,6 +396,8 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
                         players[vote["sender"]]["voting"] = True
 
             for key in players:
+                if("username" in players[key]):
+                    continue
                 if((not players[key]["voting"] )and players[key]["status"]!="replaced" and players[key]["status"]!="dead" and players[key]["status"]!="victory"):
                     not_voting += players[key]["name"]+", "
                     not_voting_no += 1
@@ -464,6 +478,8 @@ def getGeneralInfo(days_posts, player_data, players, player):
 
     response = "<h3>"+player_data["name"]+"</h3>"
     response += "<b>Pronouns:</b> "+player_data["pronouns"]
+    if(player_data["nickname"] != None):
+        response += "<br><b>Nickname:</b> "+player_data["nickname"]
     response += "<br><b>Timezone:</b> "+player_data["timezone"]
     response += "<br><b>Status:</b> "+player_data["status"]
     if(player_data["replaces"] != None):
@@ -629,9 +645,6 @@ def htmlTimelinePlayer(playerX, days, players, other_actions):
                 response+=("<div class=\"not_active\" style=\"display: inline\"><div id=\"striked\">"+ prefix+"<strike>"+player_code_sender + "</b> voted for <b>"+player_code_target + "</b> </strike> </div> (Unvote: "+unvoteElement+")<br></div>")
     response += "</div>"
     return response
-
-
-
 
 def getNum(vote):
     num = vote['post_num']
