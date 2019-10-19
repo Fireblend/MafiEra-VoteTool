@@ -498,8 +498,8 @@ def scrapeThread(thread_id, om=False):
                                     newplayer = n.group(2)
                                     nickname = n.group(3)
 
-                                if ("username" in players[replaced]):
-                                    replaced = players[replaced]["username"]
+                                if ("username" in players[replaced.lower()]):
+                                    replaced = players[replaced.lower()]["username"]
 
                                 players[newplayer.lower()] = {"pronouns":pronoun, "name":newplayer, "nickname":nickname, "timezone":timezone, "status": "alive", "flip_post":None, "replaces":replaced.lower(), "replaced_by":None}
                                 players[replaced.lower()]["status"] = "replaced"
