@@ -68,10 +68,10 @@ days_posts = []
 ############################################
 
 #This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
-message_list_strainer = SoupStrainer("div", {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite"]})
+message_list_strainer = SoupStrainer(["div", "ul"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite message-attribution-opposite--list", "message-attribution-main"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
-mo_message_list_strainer = SoupStrainer("div", {"class" : ["messageContent", "messageUserInfo", "messageDetails"]})
+mo_message_list_strainer = SoupStrainer(["div", "span", "abbr"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False, isOM=False):
@@ -134,16 +134,19 @@ def getSoupInBackground(sess, resp, isOM):
     #These are the users
     users = era_page.find_all("div", {"class" : "message-userDetails"})
     #These are the links
-    links = era_page.find_all("div", {"class" : "message-attribution-opposite"})
+    links = era_page.find_all("ul", {"class" : "message-attribution-opposite message-attribution-opposite--list"})
+    #These are the timestamps
+    timestamps = era_page.find_all("div", {"class" : "message-attribution-main"})
 
     #We use an alternative div name for OM since it's different there.
     if(isOM):
         posts = era_page.find_all("div", {"class" : "messageContent"})
         users = era_page.find_all("div", {"class" : "messageUserInfo"})
         links = era_page.find_all("div", {"class" : "messageDetails"})
+        timestamps = era_page.find_all("abbr", {"class" : "DateTime"})
 
     #Readies the data for this page in the background
-    resp.data = {"posts":posts, "users":users, "links":links}
+    resp.data = {"posts":posts, "users":users, "links":links, "timestamps":timestamps}
 
 ############################################
 ####     MAIN SCRAPING FUNCTION
@@ -198,9 +201,11 @@ def scrapeThread(thread_id, om=False):
         days_info = data["days_info"]
         days_posts = data["days_posts"]
         banner_url = data["banner_url"]
+
         #We find out the last day end page and post numbers, so we can start scraping from that point.
-        lastPage = days_info[len(days_info)-1]['page_end']
-        lastPost = days_info[len(days_info)-1]['day_end_n']
+        if(len(days_info) > 0):
+            lastPage = days_info[len(days_info)-1]['page_end']
+            lastPost = days_info[len(days_info)-1]['day_end_n']
 
         file.close()
     except Exception as e:
@@ -254,12 +259,22 @@ def scrapeThread(thread_id, om=False):
         for i in range(startPost, len(posts)):
             nextPost = False
             #Get the current post's content, the user, the link and the post number
+            link = links[i]
+            if(not om):
+                linkBlock = link.findAll("li")
+                link = linkBlock[len(linkBlock)-1]
+
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
-            currentLink = era_url+links[i].find("a")['href'].partition("/permalink")[0];
+            currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
+            currentTimestamp = ""
             if (om):
-                currentLink = om_url+links[i].find("a")['data-href'].partition("/permalink")[0];
-            currentPostNum = links[i].find("a").string;
+                currentLink = om_url+link.find("a")['data-href'].partition("/permalink")[0];
+
+            currentPostNum = link.find("a").string;
+
+            currentPostNum = currentPostNum.strip()
+            currentLink = currentLink.strip()
 
             if current_day_posts != None:
                 if currentUser not in current_day_posts:
@@ -279,6 +294,7 @@ def scrapeThread(thread_id, om=False):
                 #Mark last post as none so we don't have to make this comparison for future posts
                 else:
                     lastPost = None
+
 
             #Extract quotes so we don't accidentally count stuff in quotes
             hasQuote = currentPost.findAll("div", {"class": " bbCodeBlock bbCodeBlock--expandable bbCodeBlock--quote"})
