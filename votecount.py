@@ -24,7 +24,7 @@ vt_url = 'https://vote.fireblend.com/'
 
 #Commands
 command_vote= "vote:"
-command_vote_num= "(vote\[(\d)\]):"
+command_vote_num= "(vote(\d*):)"
 command_vote_nk= "vote: no kill"
 command_doublevote= "double:"
 command_triplevote= "triple:"
