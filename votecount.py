@@ -24,6 +24,7 @@ vt_url = 'https://vote.fireblend.com/'
 
 #Commands
 command_vote= "vote:"
+command_vote_num= "(vote\[(\d)\]):"
 command_vote_nk= "vote: no kill"
 command_doublevote= "double:"
 command_triplevote= "triple:"
@@ -605,6 +606,28 @@ def scrapeThread(thread_id, om=False):
                                     continue
                                 print(currentUser+" UNVOTED"+ " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp,store=True, other_actions=other_actions, day_num=len(days))
+                            #Handle multi-value vote command_
+                            elif(bool(re.search(command_vote_num, line, re.IGNORECASE))):
+                                if current_day == None or (not currentUser in players and len(players) > 1):
+                                    continue
+                                try:
+                                    m = re.search(command_vote_num, line, re.IGNORECASE)
+
+                                    command = m.group(1)
+                                    number = int(m.group(2))
+
+                                    target = str(line).lower().partition(command)[2].partition('<')[0].strip()
+                                    if not target in players and len(players) > 0:
+                                        continue
+                                    if ("username" in players[target]):
+                                        target = players[target]["username"]
+
+                                    print(currentUser+" VOTED ["+str(number)+"] FOR: "+ target + " (Post: "+str(currentPostNum)+", Link: "+currentLink+")")
+
+                                    removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
+                                    addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp, number)
+                                except:
+                                    continue
                             #Handle vote command
                             elif(command_vote in line):
                                 if current_day == None or (not currentUser in players and len(players) > 1):
