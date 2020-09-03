@@ -16,8 +16,8 @@ era_url = 'https://www.resetera.com/'
 base_thread_url = era_url+'threads/'
 
 #Outer Mafia Base URLs
-om_url = 'https://outermafia.com/'
-om_thread_url = om_url+'index.php?threads/'
+om_url = 'https://outermafia.com'
+om_thread_url = om_url+'/index.php?threads/'
 
 #Vote Tool Base URLs
 vt_url = 'https://vote.fireblend.com/'
@@ -33,6 +33,7 @@ command_day_ends= "(day (.+) ends)"
 command_day_begins= "(day (.+) begins)"
 command_reset = "votes have been reset"
 
+command_checkpoint= "checkpoint"
 command_players= "!player_list"
 command_pairs= "!pair_list"
 command_death= "((.+) has died)"
@@ -108,7 +109,7 @@ other_actions = []
 message_list_strainer = SoupStrainer(["div", "ul"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite message-attribution-opposite--list", "message-attribution-main"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
-mo_message_list_strainer = SoupStrainer(["div", "span", "abbr"],  {"class" : ["messageContent", "messageUserInfo", "messageDetails", "DateTime"]})
+mo_message_list_strainer = SoupStrainer(["a", "time", "div"],  {"class" : ["u-concealed", "username", "u-dt", "bbWrapper","message-userDetails" ]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False, isOM=False):
@@ -181,10 +182,10 @@ def getSoupInBackground(sess, resp, isOM):
 
     #We use an alternative div name for OM since it's different there.
     if(isOM):
-        posts = era_page.find_all("div", {"class" : "messageContent"})
-        users = era_page.find_all("div", {"class" : "messageUserInfo"})
-        links = era_page.find_all("div", {"class" : "messageDetails"})
-        timestamps = era_page.find_all("abbr", {"class" : "DateTime"})
+        posts = era_page.find_all("div", {"class" : "bbWrapper"})
+        users = era_page.find_all("div", {"class" : "message-userDetails"})
+        links = era_page.find_all("a", {"class" : "u-concealed"})
+        timestamps = era_page.find_all("time", {"class" : "u-dt"})
 
     #Readies the data for this page in the background
     resp.data = {"posts":posts, "users":users, "links":links, "timestamps":timestamps}
@@ -204,10 +205,10 @@ def scrapeThread(thread_id, om=False):
     numPages = 1
 
     if om:
-        pages = era_page.find("span", {"class" : "pageNavHeader"})
+        pages = era_page.find("a", {"class" : "pageNavSimple-el"})
         if(pages != None):
             nav = pages.contents[0].split(" ")
-            numPages = int(nav[3])
+            numPages = int(nav[2])
     else:
         aList = era_page.find_all('a', {'class':'pageNavSimple-el pageNavSimple-el--current'})
         for a in aList:
@@ -235,6 +236,8 @@ def scrapeThread(thread_id, om=False):
     lastPage = 1
     lastPost = None
 
+    checkpoint = False
+
     #Check if there's a file corresponding to this game already
     #if so, we load all game info and set variables so the scraper knows
     #which page and post to start scraping from.
@@ -251,8 +254,18 @@ def scrapeThread(thread_id, om=False):
 
         #We find out the last day end page and post numbers, so we can start scraping from that point.
         if(len(days_info) > 0):
-            lastPage = days_info[len(days_info)-1]['page_end']
-            lastPost = days_info[len(days_info)-1]['day_end_n']
+            if(days_info[len(days_info)-1]['page_end'] != None):
+                lastPage = days_info[len(days_info)-1]['page_end']
+                lastPost = days_info[len(days_info)-1]['day_end_n']
+            else:
+                lastPage = days_info[len(days_info)-1]['page_checkpoint']
+                lastPost = days_info[len(days_info)-1]['post_checkpoint']
+
+                current_day = days[len(days)-1]
+                current_day_info =  days_info[len(days_info)-1]
+                current_day_posts = days_posts[len(days_posts)-1]
+
+                checkpoint = True
 
         file.close()
     except Exception as e:
@@ -310,12 +323,12 @@ def scrapeThread(thread_id, om=False):
                 if(om):
                     action = "strong"
                 action_list = posts[0].find_all(action) + posts[1].find_all(action) + posts[2].find_all(action)
-                print(action_list)
+
                 pCount = 0
                 cCount = 0
                 for action in action_list:
                     #Check for color tags
-                    if (action.has_attr('style') and 'color' in action['style']) or (action.has_attr('class') and 'bbHighlight' in action['class']):
+                    if (False) or (action.has_attr('class') and 'bbHighlight' in action['class']):
                         #I'm removing bold tags here to simplify the command matching procedure
                         for e in action.findAll('br'):
                             e.extract()
@@ -370,16 +383,16 @@ def scrapeThread(thread_id, om=False):
 
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
-            currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
             currentTimestamp = ""
             if (om):
-                currentLink = om_url+link.find("a")['data-href'].partition("/permalink")[0];
-                currentTimestamp = timestamps[i].get_text(strip=True)
-            else:
+                currentLink = om_url+link['href'];
+                currentTimestamp = timestamps[i].get_text(strip=True)		
+                currentPostNum = "0"
+            else:            
+                currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
                 currentTimestamp = timestamps[i].find("time")['datetime']
                 currentTimestamp = dateutil.parser.parse(currentTimestamp).strftime("%x %X")
-
-            currentPostNum = link.find("a").string;
+                currentPostNum = link.find("a").string;
 
             currentPostNum = currentPostNum.strip()
             currentLink = currentLink.strip()
@@ -407,7 +420,7 @@ def scrapeThread(thread_id, om=False):
             #Extract quotes so we don't accidentally count stuff in quotes
             hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock-expandContent"})
             if(om):
-                hasQuote = currentPost.findAll("div", {"class": "bbCodeBlock bbCodeQuote"})
+                hasQuote = currentPost.findAll("blockquote")
             for quote in hasQuote: # Skips quoted posts
                 quote.extract()
 
@@ -417,7 +430,7 @@ def scrapeThread(thread_id, om=False):
                 action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
                 for action in action_list:
-                    print(action)
+
                     for e in action.findAll('strong'):
                         e.extract()
                     if nextPost:
@@ -459,7 +472,7 @@ def scrapeThread(thread_id, om=False):
                                         for vote in current_day[player]:
                                             if(vote["sender"]==winner.lower()):
                                                 removeActiveVote(winner.lower(), current_day, currentLink, currentPostNum, currentTimestamp)
-                                print(winner)
+
                             #Handle death command
                             if(bool(re.search(command_death, line, re.IGNORECASE)) and len(players)>0):
 
@@ -525,9 +538,6 @@ def scrapeThread(thread_id, om=False):
                             #If the day is starting, set the current day variable to a new day
                             if(bool(re.search(command_day_begins, line, re.IGNORECASE))):
                                 print("New day begins on post "+currentPostNum+"("+currentLink+")")
-
-                                print(line)
-
                                 #This is to use the day identifier as part of the title
                                 #of this day phase in the view of the data.
                                 m = re.search(command_day_begins, line, re.IGNORECASE)
@@ -535,8 +545,6 @@ def scrapeThread(thread_id, om=False):
 
                                 #Initialize new variables for the new day.
                                 current_day_posts = {}
-
-
                                 current_day_info = {"day_name":current_day_name, "day_start_l":currentLink, "day_end_l":None, "day_start_n":currentPostNum, "day_end_n":None, "page_start":p, "page_end":None}
                                 current_day = {}
                                 nextPost = True
@@ -550,20 +558,24 @@ def scrapeThread(thread_id, om=False):
                                 for img in imgList:
                                     if(img != None and img.has_attr('src') and ("countdown" in img["src"])):
                                         countdown = img["src"]
-
                                 break
                             #If the day has ended, append the current day to the days variable and then clear it
                             if(bool(re.search(command_day_ends, line, re.IGNORECASE))):
-
                                 print("Day ends on "+currentPostNum+"("+currentLink+")")
                                 current_day_info['day_end_l'] = currentLink
                                 current_day_info['day_end_n'] = currentPostNum
                                 current_day_info['page_end'] = p+lastPage
 
-                                #Add the gathered data to the big response variables
-                                days.append(current_day)
-                                days_info.append(current_day_info)
-                                days_posts.append(current_day_posts)
+                                if(not checkpoint):
+                                    #Add the gathered data to the big response variables
+                                    days.append(current_day)
+                                    days_info.append(current_day_info)
+                                    days_posts.append(current_day_posts)
+                                else:
+                                    # Replace checkpointed data with end-of-day info
+                                    days[len(days)-1] = current_day
+                                    days_info[len(days_info)-1] = current_day_info
+                                    days_posts[len(days_posts)-1] = current_day_posts
 
                                 toAppend = {'sender':None, 'target':None, 'action':'day_end', 'post_num':currentPostNum, 'post_link':currentLink, 'day_name':current_day_name, 'timestamp':currentTimestamp, 'phase':len(days)}
                                 other_actions.append(toAppend)
@@ -670,7 +682,31 @@ def scrapeThread(thread_id, om=False):
 
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp, 3)
+                            elif(command_checkpoint in line):
 
+                                current_day_info['post_checkpoint'] = currentPostNum
+                                current_day_info['page_checkpoint'] = p+lastPage
+
+                                if(not checkpoint):
+                                    #Add the gathered data to the big response variables
+                                    days.append(current_day)
+                                    days_info.append(current_day_info)
+                                    days_posts.append(current_day_posts)
+                                else:
+                                    # Replace checkpointed data with new checkpointed data
+                                    days[len(days)-1] = current_day
+                                    days[len(days_info)-1] = current_day_info
+                                    days[len(days_posts)-1] = current_day_posts
+
+                                #Update this game's file with day info
+                                try:
+                                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
+                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions})
+                                    file.write(text)
+                                    file.close()
+                                except Exception as e:
+                                    print("No file found, or error loading file: ")
+                                    print (e)
     if(current_day != None):
         days.append(current_day)
         days_info.append(current_day_info)
