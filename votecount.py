@@ -282,6 +282,9 @@ def scrapeThread(thread_id, om=False):
         page_url = thread_url + "page-" + str(p)
         requests.append(session.get(page_url, background_callback=lambda sess, resp: getSoupInBackground(sess, resp, om)))
 
+
+    checkpointPage = len(requests)-3
+
     # For each page:
     for p in range(0, len(requests)):
         #Wait if needed for the request to complete. By the time it's done we should have
@@ -386,9 +389,9 @@ def scrapeThread(thread_id, om=False):
             currentTimestamp = ""
             if (om):
                 currentLink = om_url+link['href'];
-                currentTimestamp = timestamps[i].get_text(strip=True)		
+                currentTimestamp = timestamps[i].get_text(strip=True)
                 currentPostNum = "0"
-            else:            
+            else:
                 currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
                 currentTimestamp = timestamps[i].find("time")['datetime']
                 currentTimestamp = dateutil.parser.parse(currentTimestamp).strftime("%x %X")
@@ -423,6 +426,31 @@ def scrapeThread(thread_id, om=False):
                 hasQuote = currentPost.findAll("blockquote")
             for quote in hasQuote: # Skips quoted posts
                 quote.extract()
+
+            if(checkpointPage == p and i == 0 and current_day != None):
+                current_day_info['post_checkpoint'] = currentPostNum
+                current_day_info['page_checkpoint'] = p+lastPage
+
+                if(not checkpoint):
+                    #Add the gathered data to the big response variables
+                    days.append(current_day)
+                    days_info.append(current_day_info)
+                    days_posts.append(current_day_posts)
+                else:
+                    # Replace checkpointed data with new checkpointed data
+                    days[len(days)-1] = current_day
+                    days[len(days_info)-1] = current_day_info
+                    days[len(days_posts)-1] = current_day_posts
+
+                #Update this game's file with day info
+                try:
+                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
+                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions})
+                    file.write(text)
+                    file.close()
+                except Exception as e:
+                    print("No file found, or error loading file: ")
+                    print (e)
 
             #Find all potential "actions"
             action_list = currentPost.find_all("span")
@@ -682,31 +710,7 @@ def scrapeThread(thread_id, om=False):
 
                                 removeActiveVote(currentUser, current_day, currentLink, currentPostNum, currentTimestamp)
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp, 3)
-                            elif(command_checkpoint in line):
 
-                                current_day_info['post_checkpoint'] = currentPostNum
-                                current_day_info['page_checkpoint'] = p+lastPage
-
-                                if(not checkpoint):
-                                    #Add the gathered data to the big response variables
-                                    days.append(current_day)
-                                    days_info.append(current_day_info)
-                                    days_posts.append(current_day_posts)
-                                else:
-                                    # Replace checkpointed data with new checkpointed data
-                                    days[len(days)-1] = current_day
-                                    days[len(days_info)-1] = current_day_info
-                                    days[len(days_posts)-1] = current_day_posts
-
-                                #Update this game's file with day info
-                                try:
-                                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
-                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions})
-                                    file.write(text)
-                                    file.close()
-                                except Exception as e:
-                                    print("No file found, or error loading file: ")
-                                    print (e)
     if(current_day != None):
         days.append(current_day)
         days_info.append(current_day_info)
