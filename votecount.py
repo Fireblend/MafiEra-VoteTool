@@ -444,6 +444,8 @@ def scrapeThread(thread_id, om=False):
                     days_info[len(days_info)-1] = current_day_info
                     days_posts[len(days_posts)-1] = current_day_posts
 
+                checkpoint = True
+
                 #Update this game's file with day info
                 try:
                     file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
@@ -606,6 +608,8 @@ def scrapeThread(thread_id, om=False):
                                     days[len(days)-1] = current_day
                                     days_info[len(days_info)-1] = current_day_info
                                     days_posts[len(days_posts)-1] = current_day_posts
+
+                                checkpoint = False
 
                                 toAppend = {'sender':None, 'target':None, 'action':'day_end', 'post_num':currentPostNum, 'post_link':currentLink, 'day_name':current_day_name, 'timestamp':currentTimestamp, 'phase':len(days)}
                                 other_actions.append(toAppend)
