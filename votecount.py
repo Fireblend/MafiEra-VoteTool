@@ -284,7 +284,7 @@ def scrapeThread(thread_id, om=False):
         requests.append(session.get(page_url, background_callback=lambda sess, resp: getSoupInBackground(sess, resp, om)))
 
 
-    checkpointPage = len(requests)-3
+    checkpointPage = 4
 
     # For each page:
     for p in range(0, len(requests)):
@@ -429,6 +429,7 @@ def scrapeThread(thread_id, om=False):
                 quote.extract()
 
             if(checkpointPage == p and i == 0 and current_day != None):
+                checkpointPage += 4
                 current_day_info['post_checkpoint'] = currentPostNum
                 current_day_info['page_checkpoint'] = p+lastPage
 
