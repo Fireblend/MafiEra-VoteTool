@@ -144,6 +144,7 @@ def getSoupFromText(f, isMessage=False, isOM=False):
 
 # Marks a vote as innactive
 def removeActiveVote(user, day, link, post_num, timestamp, store=False, other_actions=None, day_num=None):
+    print(day)
     for player in day:
         for vote in day[player]:
             #There should only be one active vote per player at a time
@@ -439,8 +440,8 @@ def scrapeThread(thread_id, om=False):
                 else:
                     # Replace checkpointed data with new checkpointed data
                     days[len(days)-1] = current_day
-                    days[len(days_info)-1] = current_day_info
-                    days[len(days_posts)-1] = current_day_posts
+                    days_info[len(days_info)-1] = current_day_info
+                    days_posts[len(days_posts)-1] = current_day_posts
 
                 #Update this game's file with day info
                 try:
