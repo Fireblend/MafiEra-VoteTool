@@ -255,9 +255,11 @@ def scrapeThread(thread_id, om=False):
         #We find out the last day end page and post numbers, so we can start scraping from that point.
         if(len(days_info) > 0):
             if(days_info[len(days_info)-1]['page_end'] != None):
+                print("No checkpoint, last page:", days_info[len(days_info)-1]['page_end'] )
                 lastPage = days_info[len(days_info)-1]['page_end']
                 lastPost = days_info[len(days_info)-1]['day_end_n']
             else:
+                print("Checkpoint page:", days_info[len(days_info)-1]['page_checkpoint'] )
                 lastPage = days_info[len(days_info)-1]['page_checkpoint']
                 lastPost = days_info[len(days_info)-1]['post_checkpoint']
 
@@ -266,6 +268,8 @@ def scrapeThread(thread_id, om=False):
                 current_day_posts = days_posts[len(days_posts)-1]
 
                 checkpoint = True
+
+            print("LAST_PAGE:"+str(lastPage))
 
         file.close()
     except Exception as e:
@@ -290,7 +294,6 @@ def scrapeThread(thread_id, om=False):
         #Wait if needed for the request to complete. By the time it's done we should have
         #access to the posts, users and links as parsed by the getSoupInBackground function
         pageData = requests[p].result().data
-
         #These are the posts
         posts = pageData["posts"]
         #These are the users
@@ -427,10 +430,11 @@ def scrapeThread(thread_id, om=False):
             for quote in hasQuote: # Skips quoted posts
                 quote.extract()
 
-            if(checkpointPage == p and i == 0 and current_day != None):
-                checkpointPage += 4
+            if(p % checkpointPage == 0 and i == 0 and current_day != None):
+                print("CHECKPOINT AT PAGE "+str(p+lastPage))
+
                 current_day_info['post_checkpoint'] = currentPostNum
-                current_day_info['page_checkpoint'] = p+lastPage
+                current_day_info['page_checkpoint'] = p+lastPage-1
 
                 if(not checkpoint):
                     #Add the gathered data to the big response variables
@@ -461,7 +465,6 @@ def scrapeThread(thread_id, om=False):
                 action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
                 for action in action_list:
-
                     for e in action.findAll('strong'):
                         e.extract()
                     if nextPost:

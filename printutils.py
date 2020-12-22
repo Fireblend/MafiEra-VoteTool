@@ -102,10 +102,16 @@ def htmlPrintDaySeq(days, players, other_actions):
             response+= prefix+player_code_target+"</b> won the game!<br>"
             continue
         elif(vote['action'] == 'day_start'):
-            response+= prefix+"Day "+vote["day_name"]+" begins!</b><br><br>"
+            day_namex = vote["day_name"]
+            if(day_namex == None):
+                day_namex=""
+            response+= prefix+"Day "+day_namex+" begins!</b><br><br>"
             continue
-        elif(vote['action'] == 'day_end'):
-            response+= prefix+"Day "+vote["day_name"]+" ends!</b><br>"
+        elif(vote['action'] == 'day_end'):            
+            day_namex = vote["day_name"]
+            if(day_namex == None):
+                day_namex=""
+            response+= prefix+"Day "+day_namex+" ends!</b><br>"
             continue
 
 
