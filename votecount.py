@@ -144,7 +144,6 @@ def getSoupFromText(f, isMessage=False, isOM=False):
 
 # Marks a vote as innactive
 def removeActiveVote(user, day, link, post_num, timestamp, store=False, other_actions=None, day_num=None):
-    print(day)
     for player in day:
         for vote in day[player]:
             #There should only be one active vote per player at a time
@@ -718,7 +717,16 @@ def scrapeThread(thread_id, om=False):
                                 addActiveVote(currentUser, target, current_day, currentLink, currentPostNum, currentTimestamp, 3)
 
     if(current_day != None):
-        days.append(current_day)
-        days_info.append(current_day_info)
-        days_posts.append(current_day_posts)
+        if (checkpoint == False):
+            days.append(current_day)
+            days_info.append(current_day_info)
+            days_posts.append(current_day_posts)
+        else:
+            del days[-1]
+            del days_info[-1]
+            del days_posts[-1]
+            days.append(current_day)
+            days_info.append(current_day_info)
+            days_posts.append(current_day_posts)
+
     return {"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions, "countdown":countdown}

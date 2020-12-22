@@ -425,6 +425,7 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
     return response
 
 def totalCountPrint(days_posts, players, thread_url):
+    print(days_posts)
     total_posts_count = {}
     for day_no in range(0, len(days_posts)):
         for player in days_posts[day_no]:
