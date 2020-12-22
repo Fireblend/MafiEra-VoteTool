@@ -6,6 +6,7 @@ import printutils_track
 import mafiagen
 import json
 from flask import Flask, render_template, redirect
+from flask_cors import CORS
 
 #Era Base URLs
 era_url = 'https://www.resetera.com/'
@@ -22,6 +23,7 @@ vt_url = 'https://vote.fireblend.com/'
 ####     FLASK CALLBACKS
 ############################################
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/favicon.ico')
 def favicon():
