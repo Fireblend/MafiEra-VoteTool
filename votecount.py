@@ -25,7 +25,7 @@ vt_url = 'https://vote.fireblend.com/'
 #Commands
 command_vote= "vote:"
 command_vote_num= "(vote(\d+):)"
-command_vote_nk= "vote: no kill"
+command_vote_nk= "vote: no vote"
 command_doublevote= "double:"
 command_triplevote= "triple:"
 command_unvote= "unvote"
@@ -366,8 +366,8 @@ def scrapeThread(thread_id, om=False):
                                 players[player_1.lower()]["partner"] = player_2.lower()
                                 players[player_2.lower()]["partner"] = player_1.lower()
                 if(len(players) > 0):
-                    players["no kill"] = {"nokill":True, "name": "No kill"}
-                    players["no lynch"] = {"username":"no kill"}
+                    players["no vote"] = {"nokill":True, "name": "No vote"}
+                    players["no kill"] = {"username":"no vote"}
                     try:
                         file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
                         text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players})
