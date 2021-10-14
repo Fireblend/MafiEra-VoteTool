@@ -146,7 +146,7 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
 
     response = "<div class=\"column1\">"
     response += htmlHeader(days[len(days)-1], days_info, days_posts, players, thread_url, countdown)
-    response+=("<div class=\"day_title\"><br><B> ==== GAME TIMELINE ==== </B><br></div>")
+    response+=("<br><div class=\"day_title\"><B>GAME TIMELINE</B><br></div><br>")
     response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
     response+="<br><br></div>"
 
@@ -219,9 +219,9 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
         day_info = days_info[day_no]
 
         if("day_name" in day_info):
-            response+=("<div class=\"day_title\"><br><B> ==== DAY "+day_info["day_name"].upper()+" VOTES ==== </B><br></div>")
+            response+=("<br><div class=\"day_title\"><B>DAY "+day_info["day_name"].upper()+" VOTES</B><br></div><br>")
         else:
-            response+=("<div class=\"day_title\"><br><B> ==== DAY "+str(total_days-day_no)+" VOTES ==== </B><br></div>")
+            response+=("<br><div class=\"day_title\"><B>DAY "+str(total_days-day_no)+" VOTES</B><br></div><br>")
         contents = ""
 
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
@@ -240,7 +240,7 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
             response+="<div class=\"day_info\">"+htmlPrintDay(days[day_no], players)
         response+="<br></div>"
         if(day_no == 0 and len(days)>1):
-            response+= "<a class=\"toggle\" onclick=\"toggleDays()\" href=\"#a\">See/hide previous days</a><br>"
+            response+= "<a class=\"toggle\" onclick=\"toggleDays()\" href=\"#a\">👀 See/hide previous days</a><br>"
             response+= "<br><span class=\"old_days\">"
 
     days.reverse()
@@ -439,7 +439,7 @@ def totalCountPrint(days_posts, players, thread_url):
                 total_posts_count[player] += days_posts[day_no][player]
             else:
                 total_posts_count[player] = days_posts[day_no][player]
-    response="<br><br><b><div class=\"day_title\">=== PLAYERS & POST COUNTS ===</div></b><br><div class=\"day_info\">"
+    response="<br><br><b><div class=\"day_title\">PLAYERS & POST COUNTS</div></b><br><div class=\"day_info\">"
     for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
         player_code = getPlayerElement(player, players, thread_url, True)
 

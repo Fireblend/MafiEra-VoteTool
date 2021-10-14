@@ -303,16 +303,15 @@ def scrapeThread(thread_id, om=False):
         #These are the timestamps
         timestamps = pageData["timestamps"]
 
-        if(True):
-            i = 0
-            while(i != len(links)):
-                linkBlock = links[i].findAll("li")
-                link = linkBlock[len(linkBlock)-1]
-                lstr = link.find("a")['href'].partition("/permalink")[0]
-                if("#" in lstr or "threadmarks" in lstr):
-                    links.pop(i)
-                    i = i - 1
-                i = i+1
+        i = 0
+        while(i != len(links)):
+            linkBlock = links[i].findAll("li")
+            link = linkBlock[len(linkBlock)-1]
+            lstr = link.find("a")['href'].partition("/permalink")[0]
+            if("#" in lstr or "threadmarks" in lstr):
+                links.pop(i)
+                i = i - 1
+            i = i+1
 
         #Let's skip the first 3 posts in the thread (usually rules)
         startPost = 0
@@ -386,13 +385,13 @@ def scrapeThread(thread_id, om=False):
             nextPost = False
             #Get the current post's content, the user, the link and the post number
             link = links[i]
-            if(True):
-                linkBlock = link.findAll("li")
-                link = linkBlock[len(linkBlock)-1]
+            linkBlock = link.findAll("li")
+            link = linkBlock[len(linkBlock)-1]
 
             currentPost = posts[i]
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
             currentTimestamp = ""
+            
             if (om):
                 currentLink = om_url+link.find("a")['href'];
                 currentTimestamp = timestamps[i].get_text(strip=True)

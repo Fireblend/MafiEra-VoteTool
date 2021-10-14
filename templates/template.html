@@ -1,6 +1,9 @@
 
 <head>
-  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Special+Elite">
 </head>
 <style>
 a {
@@ -35,37 +38,35 @@ input {
   font-size: 19px;
 }
 #content {
-  margin-left: 15px;
+  margin-left: 17px;
 }
 
 .toggle {
-    font-size : 16px;
+    font-size : 17px;
     border-style: solid;
-    border-width: 2px;
+    border-width: 0px;
     color: #383838;
     margin-right: 3px;
-    box-shadow: 4px 4px 2px grey;
     background-color: #d8d8d8;
-    padding: 3px;
+    padding: 8px;
     text-decoration: none;
     border-color: #383838;
-    border-radius: 25px;
+    border-radius: 10px;
 }
 .old_days {
     display:none;
 }
 .togglec {
-    font-size : 16px;
+    font-size : 17px;
     border-style: solid;
-    border-width: 2px;
+    border-width: 0px;
     color: #383838;
     margin-right: 3px;
-    box-shadow: 4px 4px 2px grey;
     background-color: #ff9f91;
-    padding: 3px;
+    padding: 8px;
     text-decoration: none;
     border-color: #383838;
-    border-radius: 25px;
+    border-radius: 10px;
 }
 .day {
     white-space:pre-wrap;
@@ -81,9 +82,51 @@ input {
   margin-left:12px;
 }
 .day_title {
-  font-size: 19px;
+  font-family: 'Special Elite', sans-serif;
+  font-size: 22px;
   display: inline;
+    text-decoration: none;
+  position:relative;
 }
+
+.day_title:before{
+  content:"";
+  z-index:-1;
+  left:-0.5em;
+  top:-0.1em;
+  border-width:2px;
+  border-style:solid;
+  border-color:red;
+  position:absolute;
+  border-right-color:transparent;
+  width:100%;
+  height:1em;
+  transform:rotate(2deg);
+  opacity:0.7;
+  border-radius:50%;
+  padding:0.1em 0.25em;
+}
+
+.day_title:after{
+  content:"";
+  z-index:-1;
+  left:-0.5em;
+  top:0.1em;
+  padding:0.1em 0.25em;
+  border-width:2px;
+  border-style:solid;
+  border-color:red;
+  border-left-color:transparent;
+  border-top-color:transparent;
+  position:absolute;
+  width:100%;
+  height:1em;
+  transform:rotate(-1deg);
+  opacity:0.7;
+  border-radius:50%;
+}
+
+
 .name {
   color: #2d2d2d;
 }
@@ -95,6 +138,7 @@ input {
     position: absolute;
     z-index: 100;
     padding: 15px;
+    border-radius: 10px;
 }
 
 * {
@@ -133,9 +177,9 @@ input {
   </div>
 
   <div id="buttons">
-    <a class="toggle" onclick="toggleFormat()" href="#">Toggle View</a>
-    <a class="toggle" onclick="toggleNAVotes()" href="#">Toggle All/Active</a><br><br>
-    <a class="togglec" onclick="copyCurrentDay()" href="#">Copy Current Day BBCode</a>
+    <a class="toggle" onclick="toggleFormat()" href="#">👀 Toggle View</a>
+    <a class="toggle" onclick="toggleNAVotes()" href="#">🔍 Toggle All/Active</a><br><br>
+    <a class="togglec" onclick="copyCurrentDay()" href="#">📄 Copy Current Day BBCode</a>
   </div>
 
   <div class="row">
