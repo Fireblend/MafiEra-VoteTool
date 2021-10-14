@@ -30,7 +30,7 @@ command_doublevote= "double:"
 command_triplevote= "triple:"
 command_unvote= "unvote"
 command_day_ends= "(day (.+) ends)"
-command_day_begins= "(day (.+) begins)"
+command_day_begins= "(day (.+) (begins|starts))"
 command_reset = "votes have been reset"
 
 command_checkpoint= "checkpoint"
@@ -109,7 +109,7 @@ other_actions = []
 message_list_strainer = SoupStrainer(["div", "ul", "time"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite message-attribution-opposite--list ", "message-attribution-main", "u-dt"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
-mo_message_list_strainer = SoupStrainer(["a", "time", "div"],  {"class" : ["u-concealed", "username", "u-dt", "bbWrapper","message-userDetails" ]})
+mo_message_list_strainer = SoupStrainer(["a", "time", "div", "ul"],  {"class" : ["u-concealed", "username", "message-attribution-opposite message-attribution-opposite--list ", "u-dt", "bbWrapper","message-userDetails" ]})
 
 # Returns a soup object from a URL
 def getSoup(url, isMessage=False, isOM=False):
@@ -184,7 +184,7 @@ def getSoupInBackground(sess, resp, isOM):
     if(isOM):
         posts = era_page.find_all("div", {"class" : "bbWrapper"})
         users = era_page.find_all("div", {"class" : "message-userDetails"})
-        links = era_page.find_all("a", {"class" : "u-concealed"})
+        links = era_page.find_all("ul", {"class" : "message-attribution-opposite message-attribution-opposite--list "})
         timestamps = era_page.find_all("time", {"class" : "u-dt"})
 
     #Readies the data for this page in the background
@@ -303,7 +303,7 @@ def scrapeThread(thread_id, om=False):
         #These are the timestamps
         timestamps = pageData["timestamps"]
 
-        if(not om):
+        if(True):
             i = 0
             while(i != len(links)):
                 linkBlock = links[i].findAll("li")
@@ -330,11 +330,13 @@ def scrapeThread(thread_id, om=False):
                     action = "strong"
                 action_list = posts[0].find_all(action) + posts[1].find_all(action) + posts[2].find_all(action)
 
+                print(action_list)
+
                 pCount = 0
                 cCount = 0
                 for action in action_list:
                     #Check for color tags
-                    if (False) or (action.has_attr('class') and 'bbHighlight' in action['class']):
+                    if ('color' in action['style'] if om else False) or action.has_attr('class') and 'bbHighlight' in action['class']:
                         #I'm removing bold tags here to simplify the command matching procedure
                         for e in action.findAll('br'):
                             e.extract()
@@ -377,13 +379,14 @@ def scrapeThread(thread_id, om=False):
                         print("No file found, or error loading file: ")
                         print (e)
 
+        print(players)
 
         #For each post in this page:
         for i in range(startPost, len(posts)):
             nextPost = False
             #Get the current post's content, the user, the link and the post number
             link = links[i]
-            if(not om):
+            if(True):
                 linkBlock = link.findAll("li")
                 link = linkBlock[len(linkBlock)-1]
 
@@ -391,9 +394,9 @@ def scrapeThread(thread_id, om=False):
             currentUser = users[i].find("a", {"class": "username"}).get_text(strip=True).lower();
             currentTimestamp = ""
             if (om):
-                currentLink = om_url+link['href'];
+                currentLink = om_url+link.find("a")['href'];
                 currentTimestamp = timestamps[i].get_text(strip=True)
-                currentPostNum = "0"
+                currentPostNum = link.find("a").string;
             else:
                 currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
                 currentTimestamp = timestamps[i].get_text(strip=True)
