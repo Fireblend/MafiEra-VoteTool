@@ -146,7 +146,7 @@ def htmlPrintSeq(days, days_info, days_posts, players, thread_url, other_actions
 
     response = "<div class=\"column1\">"
     response += htmlHeader(days[len(days)-1], days_info, days_posts, players, thread_url, countdown)
-    response+=("<br><div class=\"day_title\"><B>GAME TIMELINE</B><br></div><br>")
+    response+=("<br><div class=\"day_title\"><B>GAME TIMELINE</B></div><br><br>")
     response+="<div class=\"day_info\">"+htmlPrintDaySeq(days, players, other_actions)
     response+="<br><br></div>"
 
@@ -219,9 +219,9 @@ def htmlPrint(days, days_info, days_posts, players, thread_url, countdown=None):
         day_info = days_info[day_no]
 
         if("day_name" in day_info):
-            response+=("<br><div class=\"day_title\"><B>DAY "+day_info["day_name"].upper()+" VOTES</B><br></div><br>")
+            response+=("<br><div class=\"day_title\"><B>DAY "+day_info["day_name"].upper()+" VOTES</B></div><br><br>")
         else:
-            response+=("<br><div class=\"day_title\"><B>DAY "+str(total_days-day_no)+" VOTES</B><br></div><br>")
+            response+=("<br><div class=\"day_title\"><B>DAY "+str(total_days-day_no)+" VOTES</B></div><br><br>")
         contents = ""
 
         for player in sorted(days_posts[day_no], key=days_posts[day_no].get, reverse=True):
@@ -439,7 +439,7 @@ def totalCountPrint(days_posts, players, thread_url):
                 total_posts_count[player] += days_posts[day_no][player]
             else:
                 total_posts_count[player] = days_posts[day_no][player]
-    response="<br><br><b><div class=\"day_title\">PLAYERS & POST COUNTS</div></b><br><div class=\"day_info\">"
+    response="<br><br><b><div class=\"day_title\">PLAYERS & POST COUNTS</div></b><div class=\"day_info\"><br>"
     for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
         player_code = getPlayerElement(player, players, thread_url, True)
 
