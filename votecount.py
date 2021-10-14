@@ -106,7 +106,7 @@ other_actions = []
 ############################################
 
 #This strainer acts as a filter for the parser. We only care about divs whose classes are any of these:
-message_list_strainer = SoupStrainer(["div", "ul"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite message-attribution-opposite--list", "message-attribution-main"]})
+message_list_strainer = SoupStrainer(["div", "ul", "time"],  {"class" : ["bbWrapper", "message-userDetails", "message-attribution-opposite message-attribution-opposite--list ", "message-attribution-main", "u-dt"]})
 
 #This is the same thing, except for OuterMafia, since some divs have different names due to the theme difference:
 mo_message_list_strainer = SoupStrainer(["a", "time", "div"],  {"class" : ["u-concealed", "username", "u-dt", "bbWrapper","message-userDetails" ]})
@@ -176,9 +176,9 @@ def getSoupInBackground(sess, resp, isOM):
     #These are the users
     users = era_page.find_all("div", {"class" : "message-userDetails"})
     #These are the links
-    links = era_page.find_all("ul", {"class" : "message-attribution-opposite message-attribution-opposite--list"})
+    links = era_page.find_all("ul", {"class" : "message-attribution-opposite message-attribution-opposite--list "})
     #These are the timestamps
-    timestamps = era_page.find_all("div", {"class" : "message-attribution-main"})
+    timestamps = era_page.find_all("time", {"class" : "u-dt"})
 
     #We use an alternative div name for OM since it's different there.
     if(isOM):
@@ -396,8 +396,7 @@ def scrapeThread(thread_id, om=False):
                 currentPostNum = "0"
             else:
                 currentLink = era_url+link.find("a")['href'].partition("/permalink")[0];
-                currentTimestamp = timestamps[i].find("time")['datetime']
-                currentTimestamp = dateutil.parser.parse(currentTimestamp).strftime("%x %X")
+                currentTimestamp = timestamps[i].get_text(strip=True)
                 currentPostNum = link.find("a").string;
 
             currentPostNum = currentPostNum.strip()
@@ -461,10 +460,13 @@ def scrapeThread(thread_id, om=False):
 
             #Find all potential "actions"
             action_list = currentPost.find_all("span")
+            
             if(om):
                 action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
+                print(action_list)
                 for action in action_list:
+                    print(action)
                     for e in action.findAll('strong'):
                         e.extract()
                     if nextPost:
