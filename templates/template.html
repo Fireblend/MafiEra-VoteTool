@@ -8,6 +8,7 @@
 <style>
 a {
   color: #f44141;
+  text-decoration:none;
 }
 body {
   font-family: 'Ubuntu', sans-serif;
@@ -33,6 +34,7 @@ input {
   width: 240px;
 }
 #info {
+  font-family: 'Special Elite', sans-serif;
   text-align: center;
   width: auto;
   font-size: 19px;
@@ -165,6 +167,20 @@ input {
     width: 100%;
   }
 }
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    font-size: 16;
+    margin-right: 10;
+    margin-bottom: 10;
+    text-align: left;
+    background-color: rgba(223, 129, 67, 0.158);
+    border-radius: 10px;
+    padding: 10;
+    z-index: 2;
+}
 </style>
 <head>
   <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
@@ -202,13 +218,13 @@ input {
         </div>
     </div>
   </div>
-
-
-    <br><br>
-    <br><br>
-    <br><br>
+  <br>
   </div>
-
+  <div id="footer">
+    Made by Fireblend <abbr rel="tooltip" title="and Python 🐍">with love</abbr> ❤️
+    <br>- <a href="https://vote.fireblend.com">Gamerunner Instructions</a>
+    <br>- <a href="https://github.com/Fireblend/MafiEra-VoteTool">Tool Code Here</a> (very ugly)
+  </div>
   <script>
   function toggleFormat() {
     var html = document.getElementById("html_out");

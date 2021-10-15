@@ -196,7 +196,7 @@ def htmlHeader(day, days_info, days_posts, players, thread_url, countdown=None):
             notvoting += 1
             not_voting_text += players[key]["name"]+"<br>"
 
-    response+=("<br><br><b>Current Stats:</b><br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>: " + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]")
+    response+=("<br><br><b><div class='day_title'>GAME STATS</div><br></b><br>[ <abbr rel=\"tooltip\" title=\""+alive_text+"\"><b>Alive</b>: " + str(alive) + "</abbr> | <abbr rel=\"tooltip\" title=\""+dead_text+"\"><b>Dead</b>: " + str(dead) + "</abbr> | <b>Majority</b>: " + str(math.floor(alive/2+1))+" ]")
     response+=("<br>[ <abbr rel=\"tooltip\" title=\""+voting_text+"\"><b>Voting</b>: " + str(voting) + "</abbr> | <abbr rel=\"tooltip\" title=\""+not_voting_text+"\"><b>Not Voting</b>: " + str(notvoting) + "</abbr> ]")
     if(victory > 0):
         response+=("<br>[ <abbr rel=\"tooltip\" title=\""+victory_text+"\"><b>Winners</b>: " + str(victory) + "</abbr> ]")
@@ -430,7 +430,7 @@ def bbCodePrint(days, days_info, days_posts, players, countdown=None):
 
     return response
 
-def totalCountPrint(days_posts, players, thread_url):
+def totalCountPrint(days_posts, players, thread_url, om=False):
     print(days_posts)
     total_posts_count = {}
     for day_no in range(0, len(days_posts)):
@@ -439,7 +439,7 @@ def totalCountPrint(days_posts, players, thread_url):
                 total_posts_count[player] += days_posts[day_no][player]
             else:
                 total_posts_count[player] = days_posts[day_no][player]
-    response="<br><br><b><div class=\"day_title\">PLAYERS & POST COUNTS</div></b><div class=\"day_info\"><br>"
+    response="<br><br><b><div class=\"day_title\">PLAYERS & POST COUNTS</div></b><div class=\"day_info\">"
     for player in sorted(total_posts_count, key=total_posts_count.get, reverse=True):
         player_code = getPlayerElement(player, players, thread_url, True)
 
@@ -448,7 +448,7 @@ def totalCountPrint(days_posts, players, thread_url):
         iso_icon = "<abbr rel=\"tooltip\" title=\"See posts in thread\">"
         iso_icon = iso_icon+"<a style=\"text-decoration:none\" href='"+  iso_url +"' target=\"_blank\">"+str(total_posts_count[player])+"</a></abbr>"
 
-        response+="<br><u>"+ player_code + "</u>: "+iso_icon
+        response+="<br><u>"+ player_code + "</u>: "+ (iso_icon if not om else str(total_posts_count[player]))
     response+="<br></div>"
     return response
 

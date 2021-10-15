@@ -62,13 +62,12 @@ def gamePage(threadId):
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"], countdown=res["countdown"])
     totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
 
-    header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header="<br><div class='day_title'><b>MafiEra Vote Tool</b></div><br>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Game Thread</b><br>"
     if(res['banner_url'] != None):
-        header+="<img src=\""+res['banner_url']+"\" />"
+        header+="<img src=\""+res['banner_url']+"\" /></a>"
 
     header+="<br><br>"
-
 
     return render_template('template.html', thread_url=base_thread_url+threadId, html=hresponse, html_seq=hresponseseq, bbcode=bresponse, totals=totals, banner=res["banner_url"], header=header, current_day_id="day"+str(len(res["days"])))
 
@@ -79,12 +78,13 @@ def userPage(threadId, player):
 
     general, votes_for, votes_by, timeline  = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player, res["other_actions"])
 
-    header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header="<br><div class='day_title'><b>MafiEra Vote Tool</b></div><br>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Game Thread</b><br>"
     if(res['banner_url'] != None):
-        header+="<img src=\""+res['banner_url']+"\" />"
+        header+="<img src=\""+res['banner_url']+"\" /></a>"
 
     header+="<br><br>"
+
 
     if(len(res["days"])) == 0:
         return render_template('template_nogame.html')
@@ -100,10 +100,10 @@ def trackMoves(threadId):
 
     bresponse = printutils_track.bbCodePrint(res["days"], res["days_info"], res["days_posts"])
 
-    header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header="<br><div class='day_title'><b>MafiEra Vote Tool</b></div><br>"
+    header+="<br><a href=\""+base_thread_url+threadId+"\"><b>Game Thread</b><br>"
     if(res['banner_url'] != None):
-        header+="<img src=\""+res['banner_url']+"\" />"
+        header+="<img src=\""+res['banner_url']+"\" /></a>"
 
     header+="<br><br>"
 
@@ -128,12 +128,12 @@ def omGamePage(threadId):
 
     hresponse = printutils.htmlPrint(res["days"], res["days_info"], res["days_posts"], res["players"], url, countdown=res["countdown"])
     bresponse = printutils.bbCodePrint(res["days"], res["days_info"], res["days_posts"], res["players"], countdown=res["countdown"])
-    totals = printutils.totalCountPrint(res["days_posts"], res["players"], url)
+    totals = printutils.totalCountPrint(res["days_posts"], res["players"], url, om=True)
 
-    header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header="<br><div class='day_title'><b>MafiEra Vote Tool</b></div><br>"
+    header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Game Thread</b><br>"
     if(res['banner_url'] != None):
-        header+="<img src=\""+res['banner_url']+"\" />"
+        header+="<img src=\""+res['banner_url']+"\" /></a>"
 
     header+="<br><br>"
 
@@ -147,10 +147,10 @@ def omUserPage(threadId, player):
 
     general, votes_for, votes_by, timeline = printutils.htmlPrintPlayer(res["days"], res["days_posts"], res["players"], player, res["other_actions"])
 
-    header="<br><b>MafiEra Vote Tool 3000</b>"
-    header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Go To Game Thread</b></a><br>"
+    header="<br><div class='day_title'><b>MafiEra Vote Tool</b></div><br>"
+    header+="<br><a href=\""+om_thread_url+threadId+"\"><b>Game Thread</b><br>"
     if(res['banner_url'] != None):
-        header+="<img src=\""+res['banner_url']+"\" />"
+        header+="<img src=\""+res['banner_url']+"\" /></a>"
 
     header+="<br><br>"
 
