@@ -151,9 +151,18 @@ input {
 .column {
   float: left;
   width: 50%;
-  padding: 10px;
+  height: max-content;
+  padding-left: 70px;
+}.column2 {
+  float: left;
+  width: 50%;
+  height: max-content;
+  padding-left: 20px;
 }
-
+.row{
+  width:1000px;
+  margin: 0 auto;
+}
 /* Clear floats after the columns */
 .row:after {
   content: "";
@@ -161,26 +170,35 @@ input {
   clear: both;
 }
 
-/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 800px) {
-  .column {
-    width: 100%;
-  }
-}
-
 #footer {
     position: fixed;
-    bottom: 0;
+    top: 0;
     right: 0;
     font-size: 16;
     margin-right: 10;
-    margin-bottom: 10;
+    margin-top: 10;
     text-align: left;
     background-color: rgba(223, 129, 67, 0.158);
     border-radius: 10px;
     padding: 10;
     z-index: 2;
 }
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 800px) {
+  .column {
+    width: 100%;
+    padding-left: 0px;
+  }
+  .column2 {
+    width: 100%;
+    padding-right: 0px;
+  }
+  #footer {
+    display: none;
+  }
+}
+
 </style>
 <head>
   <title>MafiEra Vote Tool - Brought to you by Fireblend</title>
@@ -197,9 +215,8 @@ input {
     <a class="toggle" onclick="toggleNAVotes()" href="#">🔍 Toggle All/Active</a><br><br>
     <a class="togglec" onclick="copyCurrentDay()" href="#">📄 Copy Current Day BBCode</a>
   </div>
-
-  <div class="row">
-    <div class="column">
+  <div class="row" style="align-items: center;">
+    <div class="column2">
         <div id="html_out" style="display:block">
           {{html|safe}}
         </div>
