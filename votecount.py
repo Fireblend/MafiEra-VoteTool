@@ -251,6 +251,8 @@ def scrapeThread(thread_id, om=False):
         banner_url = data["banner_url"]
         players = data["players"]
         other_actions = data["other_actions"]
+        if('countdown' in data):
+            countdown = data["countdown"]
 
         #We find out the last day end page and post numbers, so we can start scraping from that point.
         if(len(days_info) > 0):
@@ -329,8 +331,6 @@ def scrapeThread(thread_id, om=False):
                     action = "strong"
                 action_list = posts[0].find_all(action) + posts[1].find_all(action) + posts[2].find_all(action)
 
-                print(action_list)
-
                 pCount = 0
                 cCount = 0
                 for action in action_list:
@@ -371,14 +371,12 @@ def scrapeThread(thread_id, om=False):
                     players["no kill"] = {"username":"no vote"}
                     try:
                         file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
-                        text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players})
+                        text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "countdown":countdown})
                         file.write(text)
                         file.close()
                     except Exception as e:
                         print("No file found, or error loading file: ")
                         print (e)
-
-        print(players)
 
         #For each post in this page:
         for i in range(startPost, len(posts)):
@@ -453,7 +451,7 @@ def scrapeThread(thread_id, om=False):
                 #Update this game's file with day info
                 try:
                     file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
-                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions})
+                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions, "countdown":countdown})
                     file.write(text)
                     file.close()
                 except Exception as e:
@@ -466,9 +464,7 @@ def scrapeThread(thread_id, om=False):
             if(om):
                 action_list = currentPost.find_all("strong")
             if len(action_list) > 0:
-                print(action_list)
                 for action in action_list:
-                    print(action)
                     for e in action.findAll('strong'):
                         e.extract()
                     if nextPost:
@@ -620,21 +616,21 @@ def scrapeThread(thread_id, om=False):
                                 toAppend = {'sender':None, 'target':None, 'action':'day_end', 'post_num':currentPostNum, 'post_link':currentLink, 'day_name':current_day_name, 'timestamp':currentTimestamp, 'phase':len(days)}
                                 other_actions.append(toAppend)
 
-                                #Update this game's file with day info
-                                try:
-                                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
-                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions})
-                                    file.write(text)
-                                    file.close()
-                                except Exception as e:
-                                    print("No file found, or error loading file: ")
-                                    print (e)
-
                                 imgList = posts[i].findAll("img")
 
                                 for img in imgList:
                                     if(img != None and img.has_attr('src') and ("countdown" in img["src"])):
                                         countdown = img["src"]
+
+                                #Update this game's file with day info
+                                try:
+                                    file = open("gamecache/"+thread_id.replace("/", "")+".json", "w")
+                                    text = json.dumps({"days":days, "days_info":days_info, "days_posts":days_posts, "banner_url":banner_url, "players":players, "other_actions":other_actions, "countdown":countdown})
+                                    file.write(text)
+                                    file.close()
+                                except Exception as e:
+                                    print("No file found, or error loading file: ")
+                                    print (e)
 
                                 #Set day-related variables to none, since we're not in an active day phase
                                 current_day = None
